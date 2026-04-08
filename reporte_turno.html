@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reporte de Turno — Seguridad Patrimonial</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; background: #f0f2f5; color: #1a1a2e; }
+
+  .header { background: #1a3a6b; color: white; padding: 20px 32px; display: flex; align-items: center; justify-content: space-between; }
+  .header h1 { font-size: 20px; font-weight: 600; }
+  .header span { font-size: 13px; opacity: 0.7; }
+
+  .filtros { background: white; padding: 20px 32px; border-bottom: 1px solid #e2e8f0; display: flex; gap: 16px; align-items: flex-end; flex-wrap: wrap; }
+  .filtros label { font-size: 12px; color: #64748b; font-weight: 600; display: block; margin-bottom: 4px; }
+  .filtros select, .filtros input { border: 1px solid #cbd5e1; border-radius: 6px; padding: 8px 12px; font-size: 14px; color: #1e293b; background: white; outline: none; }
+  .filtros select:focus, .filtros input:focus { border-color: #1a3a6b; }
+
+  .btn { padding: 9px 20px; border-radius: 6px; border: none; font-size: 14px; font-weight: 600; cursor: pointer; transition: opacity 0.2s; }
+  .btn:hover { opacity: 0.85; }
+  .btn-primary { background: #1a3a6b; color: white; }
+  .btn-print { background: #0f766e; color: white; }
+  .btn-print { display: none; }
+
+  .contenido { max-width: 960px; margin: 24px auto; padding: 0 24px 60px; }
+
+  .resumen-cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 24px; }
+  .card { background: white; border-radius: 8px; padding: 14px 16px; border-left: 4px solid; }
+  .card.total { border-color: #1a3a6b; }
+  .card.abierto { border-color: #3b82f6; }
+  .card.en-curso { border-color: #f59e0b; }
+  .card.cerrada { border-color: #22c55e; }
+  .card.resuelta { border-color: #7c3aed; }
+  .card-num { font-size: 28px; font-weight: 700; color: #1e293b; }
+  .card-label { font-size: 11px; color: #64748b; margin-top: 2px; }
+
+  .tarea-bloque { background: white; border-radius: 8px; margin-bottom: 16px; overflow: hidden; border: 1px solid #e2e8f0; }
+  .tarea-header { padding: 14px 18px; display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; border-bottom: 1px solid #f1f5f9; }
+  .tarea-titulo { font-size: 15px; font-weight: 600; color: #1e293b; }
+  .tarea-meta { font-size: 12px; color: #64748b; margin-top: 3px; }
+  .estado-badge { padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; white-space: nowrap; flex-shrink: 0; }
+  .estado-Abierto { background: #dbeafe; color: #1e40af; }
+  .estado-En-curso { background: #fef9c3; color: #854d0e; }
+  .estado-Cerrada { background: #dcfce7; color: #166534; }
+  .estado-Resuelta { background: #ede9fe; color: #5b21b6; }
+
+  .tarea-body { padding: 14px 18px; }
+  .tarea-info { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 12px; }
+  .info-item { font-size: 12px; }
+  .info-label { color: #94a3b8; font-weight: 600; display: block; }
+  .info-value { color: #1e293b; }
+
+  .intervenciones-titulo { font-size: 12px; font-weight: 700; color: #1a3a6b; margin-bottom: 8px; padding-top: 8px; border-top: 1px solid #f1f5f9; }
+  .intervencion { background: #f8fafc; border-radius: 6px; padding: 10px 12px; margin-bottom: 6px; border-left: 3px solid #1a3a6b; }
+  .intervencion-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+  .intervencion-hora { font-size: 11px; background: #e8f0fb; color: #1a3a6b; padding: 2px 8px; border-radius: 10px; font-weight: 600; }
+  .intervencion-desc { font-size: 13px; color: #1e293b; }
+  .intervencion-meta { font-size: 11px; color: #94a3b8; margin-top: 4px; }
+
+  .sin-intervenciones { font-size: 12px; color: #94a3b8; font-style: italic; padding: 8px 0; border-top: 1px solid #f1f5f9; margin-top: 4px; }
+
+  .loading { text-align: center; padding: 60px; color: #64748b; }
+  .loading .spinner { width: 36px; height: 36px; border: 3px solid #e2e8f0; border-top-color: #1a3a6b; border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 12px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .empty { text-align: center; padding: 60px; color: #94a3b8; }
+  .empty-icon { font-size: 48px; margin-bottom: 12px; }
+
+  .reporte-titulo { font-size: 18px; font-weight: 700; color: #1a3a6b; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 2px solid #1a3a6b; display: none; }
+
+  @media print {
+    body { background: white; }
+    .header { background: #1a3a6b !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .filtros { display: none; }
+    .btn-print { display: none !important; }
+    .reporte-titulo { display: block !important; }
+    .tarea-bloque { break-inside: avoid; border: 1px solid #ccc; }
+    .intervencion { background: #f8f8f8 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .card { border: 1px solid #ccc; break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <h1>📋 Reporte de Turno</h1>
+    <span>Seguridad Patrimonial — AUBASA</span>
+  </div>
+  <button class="btn btn-print" id="btnImprimir" onclick="window.print()">🖨 Imprimir / Guardar PDF</button>
+</div>
+
+<div class="filtros">
+  <div>
+    <label>Turno</label>
+    <select id="selTurno">
+      <option value="Todos">Todos los turnos</option>
+      <option value="Mañana">Mañana</option>
+      <option value="Tarde">Tarde</option>
+      <option value="Noche">Noche</option>
+    </select>
+  </div>
+  <div>
+    <label>Desde</label>
+    <input type="date" id="selFechaDesde">
+  </div>
+  <div>
+    <label>Hasta</label>
+    <input type="date" id="selFechaHasta">
+  </div>
+  <button class="btn btn-primary" onclick="generarReporte()">🔍 Generar reporte</button>
+</div>
+
+<div class="contenido" id="contenido">
+  <div class="empty">
+    <div class="empty-icon">📋</div>
+    <div>Seleccioná turno y fecha para generar el reporte</div>
+  </div>
+</div>
+
+<script>
+const FLOW_URL = 'https://default9444ead097714ed8a608802faff70d.4f.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/b89902a8cdc84fd2b6c2fcc50d8b7818/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=LumCf2OdFu-BTnkPwlQ6DJIgxz7XxQXQByKvvmZ0jyQ';
+
+// Setear fecha de hoy por defecto
+const hoy = new Date().toISOString().split('T')[0];
+document.getElementById('selFechaDesde').value = hoy;
+document.getElementById('selFechaHasta').value = hoy;
+
+function getEstadoClass(estado) {
+  return 'estado-' + (estado || 'Abierto').replace(' ', '-');
+}
+
+function formatFecha(f) {
+  if (!f) return '—';
+  try {
+    // Evitar conversión de zona horaria — tomar solo la parte de fecha
+    const parte = f.split('T')[0];
+    if (parte && parte.length === 10) {
+      const [y, m, d] = parte.split('-');
+      return `${d}/${m}/${y}`;
+    }
+    return new Date(f).toLocaleDateString('es-AR');
+  } catch { return f; }
+}
+
+function formatHora(h) {
+  if (!h) return '—';
+  return h.length > 5 ? h.substring(0, 5) : h;
+}
+
+function val(campo) {
+  if (!campo) return '—';
+  if (typeof campo === 'object' && campo.Value) return campo.Value;
+  return campo;
+}
+
+async function generarReporte() {
+  const turno = document.getElementById('selTurno').value;
+  const fechaDesde = document.getElementById('selFechaDesde').value;
+  const fechaHasta = document.getElementById('selFechaHasta').value;
+  const contenido = document.getElementById('contenido');
+
+  if (!fechaDesde || !fechaHasta) { alert('Seleccioná un rango de fechas'); return; }
+  if (fechaDesde > fechaHasta) { alert('La fecha "Desde" no puede ser mayor que "Hasta"'); return; }
+
+  contenido.innerHTML = '<div class="loading"><div class="spinner"></div><div>Cargando reporte...</div></div>';
+  document.getElementById('btnImprimir').style.display = 'none';
+
+  try {
+    const resp = await fetch(FLOW_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ turno, fechaDesde, fechaHasta })
+    });
+
+    if (!resp.ok) throw new Error('Error ' + resp.status);
+    const data = await resp.json();
+    let tareas = Array.isArray(data) ? data : (data.value || []);
+    // Filtrar por turno en el cliente si no es "Todos"
+    if (turno !== 'Todos') {
+      tareas = tareas.filter(item => {
+        const t = item.tarea || item;
+        const turnoVal = t.Turno?.Value || t.Turno || '';
+        return turnoVal === turno;
+      });
+    }
+
+    if (tareas.length === 0) {
+      const turnoMsg = turno === 'Todos' ? 'todos los turnos' : 'turno ' + turno;
+      contenido.innerHTML = '<div class="empty"><div class="empty-icon">📭</div><div>No hay tareas para <b>' + turnoMsg + '</b> del <b>' + fechaDesde + '</b> al <b>' + fechaHasta + '</b></div></div>';
+      return;
+    }
+
+    // Contadores
+    const contadores = { total: tareas.length, Abierto: 0, 'En curso': 0, Cerrada: 0, Resuelta: 0 };
+    tareas.forEach(t => {
+      const estado = val(t.tarea?.Estado || t.Estado);
+      if (contadores[estado] !== undefined) contadores[estado]++;
+    });
+
+    let html = '';
+
+    // Titulo para impresion
+    const turnoLabel = turno === 'Todos' ? 'Todos los turnos' : 'Turno ' + turno;
+    html += `<div class="reporte-titulo">Reporte ${turnoLabel} — ${fechaDesde} al ${fechaHasta}</div>`;
+
+    // Cards resumen
+    html += `<div class="resumen-cards">
+      <div class="card total"><div class="card-num">${contadores.total}</div><div class="card-label">Total tareas</div></div>
+      <div class="card abierto"><div class="card-num">${contadores['Abierto']}</div><div class="card-label">Abiertas</div></div>
+      <div class="card en-curso"><div class="card-num">${contadores['En curso']}</div><div class="card-label">En curso</div></div>
+      <div class="card cerrada"><div class="card-num">${contadores['Cerrada']}</div><div class="card-label">Cerradas</div></div>
+    </div>`;
+
+    // Tareas
+    tareas.forEach(item => {
+      const t = item.tarea || item;
+      const intervenciones = item.intervenciones || [];
+      const estado = val(t.Estado);
+      const estadoClass = getEstadoClass(estado);
+
+      const chofer1 = t.Chofer1 || t.chofer1 || '';
+      const chofer2 = t.CHOFER2 || t.CHOFER2Value || t.chofer2 || '';
+      const chofer3 = t.Chofer3 || t.chofer3 || '';
+      const admin1  = t.Administrativo1 || '';
+      const admin2  = t.Administrativo2 || '';
+      const admin3  = t.Administrativo3 || '';
+      // Extraer Value si vienen como objetos Choice
+      const getVal = (v) => v?.Value || v || '';
+      const listaOperarios = [getVal(chofer1), getVal(chofer2), getVal(chofer3), getVal(admin1), getVal(admin2), getVal(admin3)].filter(Boolean);
+      const operarios = listaOperarios.length > 0 ? listaOperarios.map(o => `<span style="display:inline-flex;align-items:center;gap:3px;background:#e8f0fb;color:#1a3a6b;border-radius:12px;padding:2px 8px;font-size:11px;font-weight:600;margin:1px;">👤 ${o}</span>`).join(' ') : '<span style="color:#94a3b8">Sin asignar</span>';
+
+      const descripcionRealizada = t.Descripcion_de_tarea_realizada || t.descripcion_tarea_realizada || '';
+      const observacion = t.Observacion_cierre || t.observacion_cierre || '';
+
+      let intervsHtml = '';
+      if (intervenciones.length === 0) {
+        intervsHtml = '<div class="sin-intervenciones">Sin intervenciones registradas</div>';
+      } else {
+        intervsHtml = intervenciones.map(iv => {
+          const hora = iv.Hora_Intervencion || iv.hora_intervencion || '';
+          const fecha_iv = iv.Fecha_Intervencion || iv.fecha_intervencion || '';
+          const desc = iv.Descripcion || iv.descripcion || '';
+          const lat = iv.GPS_Latitud || iv.gps_latitud;
+          const lng = iv.GPS_Longitud || iv.gps_longitud;
+          const cargadoPor = iv.CargadoPorNombre || iv.cargado_por_nombre || iv.CargadoPorEmail || '';
+          const fotos = iv.FotosCarpetaURL || iv.fotos_carpeta_url || '';
+
+          let meta = [];
+          if (lat) meta.push(`📍 ${parseFloat(lat).toFixed(4)}, ${parseFloat(lng).toFixed(4)}`);
+          if (cargadoPor) meta.push(`👤 ${cargadoPor}`);
+          if (fotos) meta.push(`<a href="${fotos}" target="_blank" style="color:#1a3a6b;">📷 Ver fotos</a>`);
+
+          return `<div class="intervencion">
+            <div class="intervencion-header">
+              <span class="intervencion-hora">${formatFecha(fecha_iv)} ${formatHora(hora)} hs</span>
+            </div>
+            <div class="intervencion-desc">${desc}</div>
+            ${meta.length ? `<div class="intervencion-meta">${meta.join(' &nbsp;·&nbsp; ')}</div>` : ''}
+          </div>`;
+        }).join('');
+      }
+
+      html += `<div class="tarea-bloque">
+        <div class="tarea-header">
+          <div>
+            <div class="tarea-titulo">${t.Title || t.titulo || 'Sin título'}</div>
+            <div class="tarea-meta" style="margin-top:4px;">ID #${t.ID || t.id}</div>
+            <div style="margin-top:4px;display:flex;flex-wrap:wrap;gap:2px;">${operarios}</div>
+          </div>
+          <span class="estado-badge ${estadoClass}">${estado}</span>
+        </div>
+        <div class="tarea-body">
+          <div class="tarea-info">
+            <div class="info-item"><span class="info-label">Tipo</span><span class="info-value">${val(t.Tipo_de_tarea)}</span></div>
+            <div class="info-item"><span class="info-label">Prioridad</span><span class="info-value">${val(t.Prioridad)}</span></div>
+            <div class="info-item"><span class="info-label">Concesion</span><span class="info-value">${val(t.Concesi_x00f3_n) || '—'}</span></div>
+            <div class="info-item"><span class="info-label">Inicio</span><span class="info-value">${t.Fechadeiniciodetarea ? formatFecha(t.Fechadeiniciodetarea) + ' ' + (t.Horadeiniciodetarea || '') : '—'}</span></div>
+            <div class="info-item"><span class="info-label">Cierre</span><span class="info-value">${t.Fechadefindetarea ? formatFecha(t.Fechadefindetarea) + ' ' + (t.Horadefindetareas || '') : '—'}</span></div>
+            <div class="info-item"><span class="info-label">Intervenciones</span><span class="info-value">${intervenciones.length}</span></div>
+          </div>
+          ${descripcionRealizada ? `<div style="font-size:12px;margin-bottom:8px;padding:8px;background:#f8fafc;border-radius:4px;"><span style="color:#94a3b8;font-weight:600;display:block;margin-bottom:2px;">DESCRIPCION REALIZADA</span>${descripcionRealizada}</div>` : ''}
+          ${observacion ? `<div style="font-size:12px;margin-bottom:8px;padding:8px;background:#ede9fe;border-radius:4px;"><span style="color:#5b21b6;font-weight:600;display:block;margin-bottom:2px;">OBSERVACION DE CIERRE</span>${observacion}</div>` : ''}
+          <div class="intervenciones-titulo">INTERVENCIONES (${intervenciones.length})</div>
+          ${intervsHtml}
+        </div>
+      </div>`;
+    });
+
+    contenido.innerHTML = html;
+    document.getElementById('btnImprimir').style.display = 'inline-block';
+
+  } catch (e) {
+    contenido.innerHTML = '<div class="empty"><div class="empty-icon">⚠️</div><div>Error al cargar el reporte: ' + e.message + '</div></div>';
+  }
+}
+</script>
+</body>
+</html>
