@@ -25,7 +25,7 @@
 
   .contenido { max-width: 960px; margin: 24px auto; padding: 0 24px 60px; }
 
-  .resumen-cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 24px; }
+  .resumen-cards { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-bottom: 24px; }
   .card { background: white; border-radius: 8px; padding: 14px 16px; border-left: 4px solid; }
   .card.total { border-color: #1a3a6b; }
   .card.abierto { border-color: #3b82f6; }
@@ -211,6 +211,7 @@ async function generarReporte() {
       <div class="card abierto"><div class="card-num">${contadores['Abierto']}</div><div class="card-label">Abiertas</div></div>
       <div class="card en-curso"><div class="card-num">${contadores['En curso']}</div><div class="card-label">En curso</div></div>
       <div class="card cerrada"><div class="card-num">${contadores['Cerrada']}</div><div class="card-label">Cerradas</div></div>
+      <div class="card resuelta"><div class="card-num">${contadores['Resuelta']}</div><div class="card-label">Resueltas</div></div>
     </div>`;
 
     // Tareas
