@@ -440,7 +440,7 @@ async function generarReporte() {
 
     if (!resp.ok) throw new Error('Error ' + resp.status);
     const data = await resp.json();
-    const novedades = Array.isArray(data.novedades) ? data.novedades : [];
+    const novedades = Array.isArray(data.eventualidades) ? data.eventualidades : (Array.isArray(data.novedades) ? data.novedades : []);
     let tareas = Array.isArray(data.tareas) ? data.tareas : (Array.isArray(data) ? data : (data.value || []));
 
     if (turno !== 'Todos') {
@@ -589,7 +589,7 @@ async function generarReporte() {
             if (registros.length === 0) return '';
             return `<div class="seccion-titulo">REGISTROS POR LUGAR (${registros.length})</div>` +
               registros.map(r => {
-                const lugar = r.Lugar || r.lugar || '—';
+                const lugar = (r.Lugar && r.Lugar.Value ? r.Lugar.Value : r.Lugar) || r.lugar || '—';
                 const obs = r.Observacion || r.observacion || '';
                 const fotoUrl = r.FotosCarpetaURL || r.fotos_carpeta_url || '';
                 const lat = r.GPS_Latitud || r.gps_latitud;
