@@ -8,75 +8,135 @@
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: 'Segoe UI', Arial, sans-serif; background: #f0f2f5; color: #1a1a2e; }
-  #loginScreen { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #08235a 0%, #1a3a6b 60%, #0f5499 100%); }
-  .login-card { background: rgba(255,255,255,0.10); border: 1px solid rgba(255,255,255,0.22); border-radius: 20px; padding: 40px 36px; width: 100%; max-width: 400px; box-shadow: 0 8px 32px rgba(0,0,0,0.3); text-align: center; }
+
+  /* ── LOGIN ── */
+  #loginScreen {
+    min-height: 100vh; display: flex; align-items: center; justify-content: center;
+    background: linear-gradient(135deg, #08235a 0%, #1a3a6b 60%, #0f5499 100%);
+  }
+  .login-card {
+    background: rgba(255,255,255,0.10); border: 1px solid rgba(255,255,255,0.22);
+    border-radius: 20px; padding: 40px 36px; width: 100%; max-width: 400px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.3); text-align: center;
+  }
   .login-logo { font-size: 48px; margin-bottom: 8px; }
   .login-title { font-size: 22px; font-weight: 700; color: white; margin-bottom: 4px; }
   .login-sub { font-size: 13px; color: rgba(255,255,255,0.65); margin-bottom: 28px; }
   .login-divider { height: 1px; background: rgba(255,255,255,0.2); margin: 20px 0; }
-  .btn-ms { width: 100%; padding: 14px; border-radius: 10px; border: none; cursor: pointer; background: #2F6FD4; color: white; font-size: 15px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 12px; transition: opacity 0.2s; }
+  .btn-ms {
+    width: 100%; padding: 14px; border-radius: 10px; border: none; cursor: pointer;
+    background: #2F6FD4; color: white; font-size: 15px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center; gap: 12px;
+    transition: opacity 0.2s;
+  }
   .btn-ms:hover { opacity: 0.88; }
   .btn-ms:disabled { opacity: 0.5; cursor: not-allowed; }
   .ms-logo { display: flex; flex-direction: column; gap: 2px; }
   .ms-row { display: flex; gap: 2px; }
   .ms-sq { width: 10px; height: 10px; border-radius: 1px; }
-  .login-error { background: rgba(220,38,38,0.2); border: 1px solid rgba(220,38,38,0.5); color: #fca5a5; border-radius: 8px; padding: 10px 14px; font-size: 13px; margin-top: 16px; display: none; }
+  .login-error {
+    background: rgba(220,38,38,0.2); border: 1px solid rgba(220,38,38,0.5);
+    color: #fca5a5; border-radius: 8px; padding: 10px 14px; font-size: 13px;
+    margin-top: 16px; display: none;
+  }
   .login-hint { font-size: 12px; color: rgba(255,255,255,0.5); margin-top: 16px; }
+
+  /* ── APP ── */
   #appScreen { display: none; }
+
   .header { background: #1a3a6b; color: white; padding: 16px 32px; display: flex; align-items: center; justify-content: space-between; }
   .header h1 { font-size: 20px; font-weight: 600; }
   .header-right { display: flex; align-items: center; gap: 16px; }
   .user-info { font-size: 13px; opacity: 0.85; }
   .btn-logout { background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); color: white; padding: 6px 14px; border-radius: 6px; cursor: pointer; font-size: 13px; }
+  .btn-logout:hover { background: rgba(255,255,255,0.25); }
+
   .filtros { background: white; padding: 20px 32px; border-bottom: 1px solid #e2e8f0; display: flex; gap: 16px; align-items: flex-end; flex-wrap: wrap; }
   .filtros label { font-size: 12px; color: #64748b; font-weight: 600; display: block; margin-bottom: 4px; }
   .filtros select, .filtros input { border: 1px solid #cbd5e1; border-radius: 6px; padding: 8px 12px; font-size: 14px; color: #1e293b; background: white; outline: none; }
+  .filtros select:focus, .filtros input:focus { border-color: #1a3a6b; }
+
   .btn { padding: 9px 20px; border-radius: 6px; border: none; font-size: 14px; font-weight: 600; cursor: pointer; transition: opacity 0.2s; }
+  .btn:hover { opacity: 0.85; }
   .btn-primary { background: #1a3a6b; color: white; }
   .btn-print { background: #0f766e; color: white; display: none; }
+
   .contenido { max-width: 960px; margin: 24px auto; padding: 0 24px 60px; }
+
   .resumen-cards { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-bottom: 24px; }
   .card { background: white; border-radius: 8px; padding: 14px 16px; border-left: 4px solid; }
-  .card.total { border-color: #1a3a6b; } .card.abierto { border-color: #3b82f6; } .card.en-curso { border-color: #f59e0b; } .card.cerrada { border-color: #22c55e; } .card.resuelta { border-color: #7c3aed; }
+  .card.total { border-color: #1a3a6b; }
+  .card.abierto { border-color: #3b82f6; }
+  .card.en-curso { border-color: #f59e0b; }
+  .card.cerrada { border-color: #22c55e; }
+  .card.resuelta { border-color: #7c3aed; }
   .card-num { font-size: 28px; font-weight: 700; color: #1e293b; }
   .card-label { font-size: 11px; color: #64748b; margin-top: 2px; }
+
   .tarea-bloque { background: white; border-radius: 8px; margin-bottom: 16px; overflow: hidden; border: 1px solid #e2e8f0; }
   .tarea-header { padding: 14px 18px; display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; border-bottom: 1px solid #f1f5f9; }
   .tarea-titulo { font-size: 15px; font-weight: 600; color: #1e293b; }
   .tarea-meta { font-size: 12px; color: #64748b; margin-top: 3px; }
   .estado-badge { padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; white-space: nowrap; flex-shrink: 0; }
-  .estado-Abierto { background: #dbeafe; color: #1e40af; } .estado-En-curso { background: #fef9c3; color: #854d0e; } .estado-Cerrada { background: #dcfce7; color: #166534; } .estado-Resuelta { background: #ede9fe; color: #5b21b6; }
+  .estado-Abierto { background: #dbeafe; color: #1e40af; }
+  .estado-En-curso { background: #fef9c3; color: #854d0e; }
+  .estado-Cerrada { background: #dcfce7; color: #166534; }
+  .estado-Resuelta { background: #ede9fe; color: #5b21b6; }
+
   .tarea-body { padding: 14px 18px; }
   .tarea-info { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 12px; }
-  .info-item { font-size: 12px; } .info-label { color: #94a3b8; font-weight: 600; display: block; } .info-value { color: #1e293b; }
+  .info-item { font-size: 12px; }
+  .info-label { color: #94a3b8; font-weight: 600; display: block; }
+  .info-value { color: #1e293b; }
+
   .seccion-titulo { font-size: 12px; font-weight: 700; color: #1a3a6b; margin-bottom: 8px; padding-top: 8px; border-top: 1px solid #f1f5f9; margin-top: 8px; }
+
   .intervencion { background: #f8fafc; border-radius: 6px; padding: 10px 12px; margin-bottom: 6px; border-left: 3px solid #1a3a6b; }
   .intervencion-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
   .intervencion-hora { font-size: 11px; background: #e8f0fb; color: #1a3a6b; padding: 2px 8px; border-radius: 10px; font-weight: 600; }
   .intervencion-desc { font-size: 13px; color: #1e293b; }
   .intervencion-meta { font-size: 11px; color: #94a3b8; margin-top: 4px; }
   .sin-datos { font-size: 12px; color: #94a3b8; font-style: italic; padding: 8px 0; }
+
   .checklist-bloque { background: #f8fafc; border-radius: 6px; padding: 10px 12px; margin-bottom: 6px; border-left: 3px solid #0f766e; }
   .checklist-modo { font-size: 11px; font-weight: 700; color: #0f766e; margin-bottom: 6px; }
   .checklist-items { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 4px; }
   .check-item { font-size: 11px; padding: 2px 8px; border-radius: 10px; font-weight: 600; }
-  .check-cumple { background: #dcfce7; color: #166534; } .check-nocumple { background: #fee2e2; color: #dc2626; }
+  .check-cumple { background: #dcfce7; color: #166534; }
+  .check-nocumple { background: #fee2e2; color: #dc2626; }
   .check-km { font-size: 12px; color: #1e293b; font-weight: 600; }
+
   .control-tabla { width: 100%; border-collapse: collapse; font-size: 12px; margin-bottom: 4px; }
   .control-tabla th { background: #1a3a6b; color: white; padding: 6px 10px; text-align: left; font-weight: 600; font-size: 11px; }
   .control-tabla td { padding: 6px 10px; border-bottom: 1px solid #f1f5f9; color: #1e293b; }
   .control-tabla tr:nth-child(even) td { background: #f8fafc; }
+
   .loading { text-align: center; padding: 60px; color: #64748b; }
   .loading .spinner { width: 36px; height: 36px; border: 3px solid #e2e8f0; border-top-color: #1a3a6b; border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 12px; }
   @keyframes spin { to { transform: rotate(360deg); } }
   .empty { text-align: center; padding: 60px; color: #94a3b8; }
   .empty-icon { font-size: 48px; margin-bottom: 12px; }
   .reporte-titulo { font-size: 18px; font-weight: 700; color: #1a3a6b; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 2px solid #1a3a6b; display: none; }
+
+  .novedad-bloque { background: white; border-radius: 8px; margin-bottom: 10px; overflow: hidden; border: 1px solid #fecaca; border-left: 4px solid #dc2626; }
+  .novedad-header { padding: 12px 16px; display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; border-bottom: 1px solid #fef2f2; background: #fff5f5; }
+  .novedad-tipo { font-size: 13px; font-weight: 600; color: #991b1b; }
+  .novedad-body { padding: 10px 16px; font-size: 12px; }
+  .registro-lugar { background: #f0f7ff; border-radius: 6px; padding: 8px 12px; margin-bottom: 8px; border-left: 3px solid #3b82f6; }
+  .registro-lugar-titulo { font-size: 12px; font-weight: 700; color: #1e40af; margin-bottom: 6px; }
+  .seccion-novedades { max-width: 960px; margin: 0 auto; padding: 0 24px 24px; }
+  .seccion-novedades-titulo { font-size: 18px; font-weight: 700; color: #991b1b; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 2px solid #dc2626; }
+
   @media print {
-    body { background: white; } #loginScreen { display: none !important; }
+  @media print {
+    body { background: white; }
+    #loginScreen { display: none !important; }
     .header { background: #1a3a6b !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-    .filtros { display: none; } .btn-print { display: none !important; } .btn-logout { display: none !important; }
-    .reporte-titulo { display: block !important; } .tarea-bloque { break-inside: avoid; border: 1px solid #ccc; }
+    .filtros { display: none; }
+    .btn-print { display: none !important; }
+    .btn-logout { display: none !important; }
+    .reporte-titulo { display: block !important; }
+    .tarea-bloque { break-inside: avoid; border: 1px solid #ccc; }
     .intervencion { background: #f8f8f8 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
     .card { border: 1px solid #ccc; break-inside: avoid; }
   }
@@ -84,27 +144,35 @@
 </head>
 <body>
 
+<!-- ── LOGIN SCREEN ── -->
 <div id="loginScreen">
   <div class="login-card">
     <div class="login-logo">📋</div>
     <div class="login-title">Seguridad Patrimonial</div>
     <div class="login-sub">Reporte de Turno — AUBASA</div>
     <div class="login-divider"></div>
-    <button class="btn-ms" id="btnLogin">
+    <button class="btn-ms" id="btnLogin" onclick="loginMicrosoft()">
       <div class="ms-logo">
-        <div class="ms-row"><div class="ms-sq" style="background:#F25022"></div><div class="ms-sq" style="background:#7FBA00"></div></div>
-        <div class="ms-row"><div class="ms-sq" style="background:#00A4EF"></div><div class="ms-sq" style="background:#FFB900"></div></div>
+        <div class="ms-row">
+          <div class="ms-sq" style="background:#F25022"></div>
+          <div class="ms-sq" style="background:#7FBA00"></div>
+        </div>
+        <div class="ms-row">
+          <div class="ms-sq" style="background:#00A4EF"></div>
+          <div class="ms-sq" style="background:#FFB900"></div>
+        </div>
       </div>
       Ingresar con cuenta Microsoft
     </button>
     <div class="login-error" id="loginError"></div>
     <div class="login-hint">Solo personal de Seguridad Patrimonial</div>
     <div style="text-align:center;margin-top:16px;">
-      <a href="#" id="linkAdmin" style="color:rgba(255,255,255,0.5);font-size:12px;text-decoration:underline;">Acceso administrador</a>
+      <a href="#" onclick="loginAdmin()" style="color:rgba(255,255,255,0.5);font-size:12px;text-decoration:underline;">Acceso administrador</a>
     </div>
   </div>
 </div>
 
+<!-- ── APP SCREEN ── -->
 <div id="appScreen">
   <div class="header">
     <div>
@@ -114,11 +182,13 @@
     <div class="header-right">
       <span class="user-info" id="userInfo"></span>
       <button class="btn btn-print" id="btnImprimir" onclick="window.print()">🖨 Imprimir / PDF</button>
-      <button class="btn-logout" id="btnLogout">Salir</button>
+      <button class="btn-logout" onclick="logout()">Salir</button>
     </div>
   </div>
+
   <div class="filtros">
-    <div><label>Turno</label>
+    <div>
+      <label>Turno</label>
       <select id="selTurno">
         <option value="Todos">Todos los turnos</option>
         <option value="Mañana">Mañana</option>
@@ -126,262 +196,456 @@
         <option value="Noche">Noche</option>
       </select>
     </div>
-    <div><label>Desde</label><input type="date" id="selFechaDesde"></div>
-    <div><label>Hasta</label><input type="date" id="selFechaHasta"></div>
-    <button class="btn btn-primary" id="btnGenerar">🔍 Generar reporte</button>
+    <div>
+      <label>Desde</label>
+      <input type="date" id="selFechaDesde">
+    </div>
+    <div>
+      <label>Hasta</label>
+      <input type="date" id="selFechaHasta">
+    </div>
+    <div>
+      <label>Estado</label>
+      <select id="selEstado">
+        <option value="Todos">Todos los estados</option>
+        <option value="Abierto">Abierto</option>
+        <option value="En curso">En curso</option>
+        <option value="Cerrada">Cerrada</option>
+        <option value="Resuelta">Resuelta</option>
+      </select>
+    </div>
+    <button class="btn btn-primary" onclick="generarReporte()">🔍 Generar reporte</button>
   </div>
+
   <div class="contenido" id="contenido">
-    <div class="empty"><div class="empty-icon">📋</div><div>Seleccioná turno y fecha para generar el reporte</div></div>
+    <div class="empty">
+      <div class="empty-icon">📋</div>
+      <div>Seleccioná turno y fecha para generar el reporte</div>
+    </div>
   </div>
 </div>
 
 <script>
-// ── VARIABLES GLOBALES ───────────────────────────────────
+// ── MSAL CONFIG ──────────────────────────────────────────
+const msalConfig = {
+  auth: {
+    clientId: '006c6fd8-c5f2-4b90-b047-d0b57f0bafcb',
+    authority: 'https://login.microsoftonline.com/9444ead0-9771-4ed8-a608-802faff70d4f',
+    redirectUri: window.location.href.split('?')[0],
+  },
+  cache: { cacheLocation: 'sessionStorage' }
+};
+
+const msalInstance = new msal.PublicClientApplication(msalConfig);
+
+var GET_EMPLEADOS_URL = 'https://default9444ead097714ed8a608802faff70d.4f.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/54a1c9328080444e8a9c76c509118e60/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=9aQMa6iAlNu7cjaLQjUEUS3IvVOg6E1MJtKtaqpOpEo';
+var FLOW_URL = 'https://default9444ead097714ed8a608802faff70d.4f.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/b89902a8cdc84fd2b6c2fcc50d8b7818/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=LumCf2OdFu-BTnkPwlQ6DJIgxz7XxQXQByKvvmZ0jyQ';
+var GET_CHECKLIST_URL = 'https://default9444ead097714ed8a608802faff70d.4f.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/bf78f54bef08499eb5dc49bff2dc10eb/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=PhE5cBP9ZnY5ai0x2jgOqMrYYRerHjzIluTJQo4F4s4';
+
 var usuarioActual = null;
-var msalInstance = null;
 
-const GET_EMPLEADOS_URL = 'https://default9444ead097714ed8a608802faff70d.4f.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/54a1c9328080444e8a9c76c509118e60/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=9aQMa6iAlNu7cjaLQjUEUS3IvVOg6E1MJtKtaqpOpEo';
-const FLOW_URL = 'https://default9444ead097714ed8a608802faff70d.4f.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/b89902a8cdc84fd2b6c2fcc50d8b7818/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=LumCf2OdFu-BTnkPwlQ6DJIgxz7XxQXQByKvvmZ0jyQ';
-const GET_CHECKLIST_URL = 'https://default9444ead097714ed8a608802faff70d.4f.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/bf78f54bef08499eb5dc49bff2dc10eb/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=PhE5cBP9ZnY5ai0x2jgOqMrYYRerHjzIluTJQo4F4s4';
-
-// ── MOSTRAR APP ──────────────────────────────────────────
-function mostrarApp(nombre) {
-  usuarioActual = { nombre: nombre };
-  document.getElementById('userInfo').textContent = '👤 ' + nombre;
-  document.getElementById('loginScreen').style.display = 'none';
-  document.getElementById('appScreen').style.display = 'block';
-  var hoy = new Date().toISOString().split('T')[0];
-  document.getElementById('selFechaDesde').value = hoy;
-  document.getElementById('selFechaHasta').value = hoy;
-}
-
-function mostrarError(msg) {
-  var el = document.getElementById('loginError');
-  el.textContent = msg;
-  el.style.display = msg ? 'block' : 'none';
-}
-
-// ── LOGIN ADMIN ──────────────────────────────────────────
-document.getElementById('linkAdmin').addEventListener('click', function(e) {
-  e.preventDefault();
+function loginAdmin() {
   var user = prompt('Usuario:');
   if (!user) return;
   var pass = prompt('Contraseña:');
   if (pass === null) return;
   if (user.trim() === 'admin' && pass === 'SegPatr2026') {
-    mostrarApp('Administrador');
+    usuarioActual = { nombre: 'Administrador' };
+    document.getElementById('userInfo').textContent = '👤 Administrador';
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('appScreen').style.display = 'block';
+    var hoy = new Date().toISOString().split('T')[0];
+    document.getElementById('selFechaDesde').value = hoy;
+    document.getElementById('selFechaHasta').value = hoy;
   } else {
-    mostrarError('Usuario o contraseña incorrectos.');
+    var el = document.getElementById('loginError');
+    el.textContent = 'Usuario o contraseña incorrectos.';
+    el.style.display = 'block';
   }
-});
-
-// ── LOGOUT ───────────────────────────────────────────────
-document.getElementById('btnLogout').addEventListener('click', function() {
-  usuarioActual = null;
-  document.getElementById('loginScreen').style.display = 'flex';
-  document.getElementById('appScreen').style.display = 'none';
-  if (msalInstance) { try { msalInstance.logoutRedirect(); } catch(e) {} }
-});
-
-// ── GENERAR REPORTE ──────────────────────────────────────
-document.getElementById('btnGenerar').addEventListener('click', generarReporte);
-
-// ── MSAL / MICROSOFT LOGIN ───────────────────────────────
-document.getElementById('btnLogin').addEventListener('click', function() {
-  if (!msalInstance) { mostrarError('Login Microsoft no disponible. Usá acceso administrador.'); return; }
-  loginMicrosoft();
-});
-
-window.addEventListener('load', function() {
-  try {
-    var msalConfig = {
-      auth: {
-        clientId: '006c6fd8-c5f2-4b90-b047-d0b57f0bafcb',
-        authority: 'https://login.microsoftonline.com/9444ead0-9771-4ed8-a608-802faff70d4f',
-        redirectUri: window.location.href.split('?')[0],
-      },
-      cache: { cacheLocation: 'sessionStorage' }
-    };
-    msalInstance = new msal.PublicClientApplication(msalConfig);
-    msalInstance.initialize().then(function() {
-      return msalInstance.handleRedirectPromise();
-    }).then(function(response) {
-      if (response) { verificarYMostrarApp(response.account); return; }
-      var accounts = msalInstance.getAllAccounts();
-      if (accounts.length > 0) { verificarYMostrarApp(accounts[0]); }
-    }).catch(function(e) { console.error('MSAL error:', e); });
-  } catch(e) {
-    console.error('MSAL no disponible:', e);
-  }
-});
-
-function loginMicrosoft() {
-  var btn = document.getElementById('btnLogin');
-  btn.disabled = true;
-  mostrarError('');
-  msalInstance.loginRedirect({ scopes: ['User.Read'] }).catch(function(e) {
-    btn.disabled = false;
-    mostrarError('Error al iniciar sesión. Intentá de nuevo.');
-  });
 }
 
-function verificarYMostrarApp(account) {
+// ── INIT ─────────────────────────────────────────────────
+window.addEventListener('load', async () => {
+  await msalInstance.initialize();
+  const response = await msalInstance.handleRedirectPromise();
+  if (response) {
+    await verificarYMostrarApp(response.account);
+    return;
+  }
+  const accounts = msalInstance.getAllAccounts();
+  if (accounts.length > 0) {
+    await verificarYMostrarApp(accounts[0]);
+  }
+});
+
+async function loginMicrosoft() {
+  const btn = document.getElementById('btnLogin');
+  btn.disabled = true;
+  btn.textContent = 'Iniciando sesión...';
   mostrarError('');
-  fetch(GET_EMPLEADOS_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({}) })
-    .then(function(r) { return r.json(); })
-    .then(function(data) {
-      var email = account.username || '';
-      var empleados = Array.isArray(data) ? data : (data.value || []);
-      var empleado = empleados.find(function(e) {
-        return (e.email || e.Email || '').toLowerCase() === email.toLowerCase();
-      });
-      if (!empleado) { mostrarError('Tu cuenta no tiene acceso. Contactá al administrador.'); return; }
-      var activo = empleado.Activo && empleado.Activo.Value ? empleado.Activo.Value : empleado.Activo;
-      if (activo === 'No') { mostrarError('Tu cuenta está inactiva.'); return; }
-      mostrarApp(account.name || email);
-    })
-    .catch(function(e) { mostrarError('Error al verificar acceso: ' + e.message); });
+  try {
+    await msalInstance.loginRedirect({ scopes: ['User.Read'] });
+  } catch (e) {
+    btn.disabled = false;
+    btn.innerHTML = `<div class="ms-logo"><div class="ms-row"><div class="ms-sq" style="background:#F25022"></div><div class="ms-sq" style="background:#7FBA00"></div></div><div class="ms-row"><div class="ms-sq" style="background:#00A4EF"></div><div class="ms-sq" style="background:#FFB900"></div></div></div> Ingresar con cuenta Microsoft`;
+    mostrarError('Error al iniciar sesión. Intentá de nuevo.');
+  }
+}
+
+async function verificarYMostrarApp(account) {
+  mostrarError('');
+  try {
+    const email = account.username || account.upn || '';
+    // Verificar contra lista Empleados_SeguridadPatrimonial
+    const resp = await fetch(GET_EMPLEADOS_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({})
+    });
+    const data = await resp.json();
+    const empleados = Array.isArray(data) ? data : (data?.value || []);
+    const empleado = empleados.find(e => {
+      const empEmail = (e.email || e.Email || '').toLowerCase();
+      return empEmail === email.toLowerCase();
+    });
+
+    if (!empleado) {
+      mostrarError('Tu cuenta no tiene acceso a este reporte. Contactá al administrador.');
+      msalInstance.logoutRedirect();
+      return;
+    }
+
+    const activo = empleado.Activo?.Value || empleado.Activo || '';
+    if (activo === 'No') {
+      mostrarError('Tu cuenta está inactiva. Contactá al administrador.');
+      msalInstance.logoutRedirect();
+      return;
+    }
+
+    usuarioActual = { email, nombre: account.name || email, rol: empleado.Rol?.Value || empleado.Rol || '' };
+    document.getElementById('userInfo').textContent = `👤 ${usuarioActual.nombre}`;
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('appScreen').style.display = 'block';
+
+    const hoy = new Date().toISOString().split('T')[0];
+    document.getElementById('selFechaDesde').value = hoy;
+    document.getElementById('selFechaHasta').value = hoy;
+  } catch (e) {
+    mostrarError('Error al verificar acceso: ' + e.message);
+  }
+}
+
+function mostrarError(msg) {
+  const el = document.getElementById('loginError');
+  el.textContent = msg;
+  el.style.display = msg ? 'block' : 'none';
+}
+
+function logout() {
+  usuarioActual = null;
+  msalInstance.logoutRedirect();
 }
 
 // ── HELPERS ──────────────────────────────────────────────
 function getEstadoClass(estado) { return 'estado-' + (estado || 'Abierto').replace(' ', '-'); }
+
 function formatFecha(f) {
   if (!f) return '—';
-  try { var p = f.split('T')[0]; if (p && p.length===10) { var a=p.split('-'); return a[2]+'/'+a[1]+'/'+a[0]; } return new Date(f).toLocaleDateString('es-AR'); } catch(e) { return f; }
+  try {
+    const parte = f.split('T')[0];
+    if (parte && parte.length === 10) {
+      const [y, m, d] = parte.split('-');
+      return `${d}/${m}/${y}`;
+    }
+    return new Date(f).toLocaleDateString('es-AR');
+  } catch { return f; }
 }
-function formatHora(h) { if (!h) return '—'; return h.length > 5 ? h.substring(0, 5) : h; }
-function val(campo) { if (!campo) return '—'; if (typeof campo === 'object' && campo.Value) return campo.Value; return campo; }
+
+function formatHora(h) {
+  if (!h) return '—';
+  return h.length > 5 ? h.substring(0, 5) : h;
+}
+
+function val(campo) {
+  if (!campo) return '—';
+  if (typeof campo === 'object' && campo.Value) return campo.Value;
+  return campo;
+}
 
 // ── CHECKLIST ────────────────────────────────────────────
 async function fetchChecklist(idAsignacion) {
   try {
-    var resp = await fetch(GET_CHECKLIST_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ IDAsignacion: Number(idAsignacion) }) });
+    const resp = await fetch(GET_CHECKLIST_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ IDAsignacion: Number(idAsignacion) })
+    });
     if (!resp.ok) return [];
-    var data = await resp.json();
-    return Array.isArray(data) ? data : (data.value || []);
-  } catch(e) { return []; }
+    const data = await resp.json();
+    return Array.isArray(data) ? data : (data?.value || []);
+  } catch { return []; }
 }
 
 function renderChecklist(registros) {
   if (!registros || registros.length === 0) return '<div class="sin-datos">Sin checklist registrado</div>';
-  var valChoice = function(c) { return c && c.Value ? c.Value : c || null; };
-  return registros.map(function(r) {
-    var modo = valChoice(r.Modo) || '';
-    var esPre = modo.toLowerCase() === 'pre-inicio';
-    var km = esPre ? r.Kminicial : r.KmFinal;
-    var kmLabel = esPre ? 'Km inicial' : 'Km final';
-    var color = esPre ? '#0f766e' : '#1a3a6b';
-    var titulo = esPre ? '✅ Check Pre-Inicio' : '🔒 Check de Cierre';
-    var checks = ['Frenos','Luces','Agua','Aceite'].map(function(k) {
-      var v = valChoice(r[k]); if (!v) return '';
-      return '<span class="check-item ' + (v==='Cumple'?'check-cumple':'check-nocumple') + '">' + k + ': ' + v + '</span>';
+
+  const valChoice = (c) => c?.Value || c || null;
+
+  return registros.map(r => {
+    const modo = valChoice(r.Modo) || '';
+    const esPre = modo.toLowerCase() === 'pre-inicio';
+    const km = esPre ? r.Kminicial : r.KmFinal;
+    const kmLabel = esPre ? 'Km inicial' : 'Km final';
+    const color = esPre ? '#0f766e' : '#1a3a6b';
+    const titulo = esPre ? '✅ Check Pre-Inicio' : '🔒 Check de Cierre';
+
+    const checks = ['Frenos','Luces','Agua','Aceite'].map(k => {
+      const v = valChoice(r[k]);
+      if (!v) return '';
+      const cls = v === 'Cumple' ? 'check-cumple' : 'check-nocumple';
+      return `<span class="check-item ${cls}">${k}: ${v}</span>`;
     }).filter(Boolean).join('');
-    return '<div class="checklist-bloque" style="border-left-color:'+color+'">' +
-      '<div class="checklist-modo">'+titulo+'</div>' +
-      (km != null ? '<div class="check-km" style="margin-bottom:6px">'+kmLabel+': '+km+' km</div>' : '') +
-      (checks ? '<div class="checklist-items">'+checks+'</div>' : '') +
-      (r.Observacion ? '<div style="font-size:11px;color:#64748b;margin-top:4px">Obs: '+r.Observacion+'</div>' : '') +
-      (r.ObservacionFinal ? '<div style="font-size:11px;color:#64748b;margin-top:4px">Obs. final: '+r.ObservacionFinal+'</div>' : '') +
-      '<div style="font-size:10px;color:#94a3b8;margin-top:4px">'+(r.FechaInicio||'')+' '+(r.HoraInicio?r.HoraInicio+' hs':'')+(r.CargadoPorNombre?' · '+r.CargadoPorNombre:'')+'</div>' +
-      '</div>';
+
+    return `<div class="checklist-bloque" style="border-left-color:${color}">
+      <div class="checklist-modo">${titulo}</div>
+      ${km != null ? `<div class="check-km" style="margin-bottom:6px">${kmLabel}: ${km} km</div>` : ''}
+      ${checks ? `<div class="checklist-items">${checks}</div>` : ''}
+      ${r.Observacion ? `<div style="font-size:11px;color:#64748b;margin-top:4px">Obs: ${r.Observacion}</div>` : ''}
+      ${r.ObservacionFinal ? `<div style="font-size:11px;color:#64748b;margin-top:4px">Obs. final: ${r.ObservacionFinal}</div>` : ''}
+      <div style="font-size:10px;color:#94a3b8;margin-top:4px">${r.FechaInicio || ''} ${r.HoraInicio ? r.HoraInicio + ' hs' : ''}${r.CargadoPorNombre ? ' · ' + r.CargadoPorNombre : ''}</div>
+    </div>`;
   }).join('');
 }
 
 // ── REPORTE ──────────────────────────────────────────────
 async function generarReporte() {
-  var turno = document.getElementById('selTurno').value;
-  var fechaDesde = document.getElementById('selFechaDesde').value;
-  var fechaHasta = document.getElementById('selFechaHasta').value;
-  var contenido = document.getElementById('contenido');
+  const turno = document.getElementById('selTurno').value;
+  const estado = document.getElementById('selEstado').value;
+  const fechaDesde = document.getElementById('selFechaDesde').value;
+  const fechaHasta = document.getElementById('selFechaHasta').value;
+  const contenido = document.getElementById('contenido');
+
   if (!fechaDesde || !fechaHasta) { alert('Seleccioná un rango de fechas'); return; }
   if (fechaDesde > fechaHasta) { alert('La fecha "Desde" no puede ser mayor que "Hasta"'); return; }
+
   contenido.innerHTML = '<div class="loading"><div class="spinner"></div><div>Cargando reporte...</div></div>';
   document.getElementById('btnImprimir').style.display = 'none';
-  try {
-    var resp = await fetch(FLOW_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ turno, fechaDesde, fechaHasta }) });
-    if (!resp.ok) throw new Error('Error ' + resp.status);
-    var data = await resp.json();
-    var tareas = Array.isArray(data) ? data : (data.value || []);
-    if (turno !== 'Todos') {
-      tareas = tareas.filter(function(item) { var t = item.tarea || item; var tv = t.Turno && t.Turno.Value ? t.Turno.Value : t.Turno || ''; return tv === turno; });
-    }
-    if (tareas.length === 0) {
-      contenido.innerHTML = '<div class="empty"><div class="empty-icon">📭</div><div>No hay tareas para el período seleccionado</div></div>'; return;
-    }
-    var contadores = { total: tareas.length, Abierto: 0, 'En curso': 0, Cerrada: 0, Resuelta: 0 };
-    tareas.forEach(function(t) { var e = val(t.tarea ? t.tarea.Estado : t.Estado); if (contadores[e] !== undefined) contadores[e]++; });
 
-    var checklistMap = {};
-    await Promise.all(tareas.map(async function(item) {
-      var t = item.tarea || item; var id = t.ID || t.id;
+  try {
+    const resp = await fetch(FLOW_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ turno, fechaDesde, fechaHasta })
+    });
+
+    if (!resp.ok) throw new Error('Error ' + resp.status);
+    const data = await resp.json();
+    const novedades = Array.isArray(data.novedades) ? data.novedades : [];
+    let tareas = Array.isArray(data.tareas) ? data.tareas : (Array.isArray(data) ? data : (data.value || []));
+
+    if (turno !== 'Todos') {
+      tareas = tareas.filter(item => {
+        const t = item.tarea || item;
+        const turnoVal = t.Turno?.Value || t.Turno || '';
+        return turnoVal === turno;
+      });
+    }
+    if (estado !== 'Todos') {
+      tareas = tareas.filter(item => {
+        const t = item.tarea || item;
+        const estadoVal = t.Estado?.Value || t.Estado || '';
+        return estadoVal === estado;
+      });
+    }
+
+    if (tareas.length === 0) {
+      const turnoMsg = turno === 'Todos' ? 'todos los turnos' : 'turno ' + turno;
+      contenido.innerHTML = `<div class="empty"><div class="empty-icon">📭</div><div>No hay tareas para <b>${turnoMsg}</b> del <b>${fechaDesde}</b> al <b>${fechaHasta}</b></div></div>`;
+      return;
+    }
+
+    // Contadores
+    const contadores = { total: tareas.length, Abierto: 0, 'En curso': 0, Cerrada: 0, Resuelta: 0 };
+    tareas.forEach(t => {
+      const estado = val(t.tarea?.Estado || t.Estado);
+      if (contadores[estado] !== undefined) contadores[estado]++;
+    });
+
+    // Cargar checklists en paralelo
+    const checklistMap = {};
+    await Promise.all(tareas.map(async item => {
+      const t = item.tarea || item;
+      const id = t.ID || t.id;
       if (id) checklistMap[id] = await fetchChecklist(id);
     }));
 
-    var turnoLabel = turno === 'Todos' ? 'Todos los turnos' : 'Turno ' + turno;
-    var html = '<div class="reporte-titulo">Reporte '+turnoLabel+' — '+fechaDesde+' al '+fechaHasta+'</div>';
-    html += '<div class="resumen-cards">' +
-      '<div class="card total"><div class="card-num">'+contadores.total+'</div><div class="card-label">Total tareas</div></div>' +
-      '<div class="card abierto"><div class="card-num">'+contadores['Abierto']+'</div><div class="card-label">Abiertas</div></div>' +
-      '<div class="card en-curso"><div class="card-num">'+contadores['En curso']+'</div><div class="card-label">En curso</div></div>' +
-      '<div class="card cerrada"><div class="card-num">'+contadores['Cerrada']+'</div><div class="card-label">Cerradas</div></div>' +
-      '<div class="card resuelta"><div class="card-num">'+contadores['Resuelta']+'</div><div class="card-label">Resueltas</div></div>' +
-      '</div>';
+    const turnoLabel = turno === 'Todos' ? 'Todos los turnos' : 'Turno ' + turno;
+    let html = `<div class="reporte-titulo">Reporte ${turnoLabel} — ${fechaDesde} al ${fechaHasta}</div>`;
 
-    tareas.forEach(function(item) {
-      var t = item.tarea || item;
-      var id = t.ID || t.id;
-      var intervenciones = item.intervenciones || [];
-      var controlPolicial = item.control_policial || [];
-      var checklists = checklistMap[id] || [];
-      var estado = val(t.Estado);
-      var estadoClass = getEstadoClass(estado);
-      var getV = function(v) { return v && v.Value ? v.Value : v || ''; };
-      var ops = [getV(t.Chofer1), getV(t.CHOFER2||t.chofer2), getV(t.Chofer3), getV(t.Administrativo1), getV(t.Administrativo2), getV(t.Administrativo3)].filter(Boolean);
-      var operarios = ops.length > 0 ? ops.map(function(o) { return '<span style="background:#e8f0fb;color:#1a3a6b;border-radius:12px;padding:2px 8px;font-size:11px;font-weight:600;margin:1px;display:inline-block;">👤 '+o+'</span>'; }).join(' ') : '<span style="color:#94a3b8">Sin asignar</span>';
-      var descReal = t.Descripcion_de_tarea_realizada || '';
-      var obs = t.Observacion_cierre || '';
-      var intervsHtml = intervenciones.length === 0 ? '<div class="sin-datos">Sin intervenciones registradas</div>' :
-        intervenciones.map(function(iv) {
-          var meta = [];
-          if (iv.GPS_Latitud) meta.push('📍 '+parseFloat(iv.GPS_Latitud).toFixed(4)+', '+parseFloat(iv.GPS_Longitud).toFixed(4));
-          if (iv.CargadoPorNombre) meta.push('👤 '+iv.CargadoPorNombre);
-          if (iv.FotosCarpetaURL) meta.push('<a href="'+iv.FotosCarpetaURL+'" target="_blank" style="color:#1a3a6b;">📷 Ver fotos</a>');
-          return '<div class="intervencion"><div class="intervencion-header"><span class="intervencion-hora">'+formatFecha(iv.Fecha_Intervencion)+' '+formatHora(iv.Hora_Intervencion)+' hs</span></div><div class="intervencion-desc">'+(iv.Descripcion||'')+'</div>'+(meta.length?'<div class="intervencion-meta">'+meta.join(' &nbsp;·&nbsp; ')+'</div>':'')+'</div>';
-        }).join('');
+    html += `<div class="resumen-cards">
+      <div class="card total"><div class="card-num">${contadores.total}</div><div class="card-label">Total tareas</div></div>
+      <div class="card abierto"><div class="card-num">${contadores['Abierto']}</div><div class="card-label">Abiertas</div></div>
+      <div class="card en-curso"><div class="card-num">${contadores['En curso']}</div><div class="card-label">En curso</div></div>
+      <div class="card cerrada"><div class="card-num">${contadores['Cerrada']}</div><div class="card-label">Cerradas</div></div>
+      <div class="card resuelta"><div class="card-num">${contadores['Resuelta']}</div><div class="card-label">Resueltas</div></div>
+    </div>`;
 
-      html += '<div class="tarea-bloque">' +
-        '<div class="tarea-header"><div>' +
-        '<div class="tarea-titulo">'+(t.Title||t.titulo||'Sin título')+'</div>' +
-        '<div class="tarea-meta" style="margin-top:4px;">ID #'+id+' · '+val(t.Turno)+' · '+(val(t['Concesi_x00f3_n'])||'—')+'</div>' +
-        '<div style="margin-top:4px;">'+operarios+'</div>' +
-        '</div><span class="estado-badge '+estadoClass+'">'+estado+'</span></div>' +
-        '<div class="tarea-body">' +
-        '<div class="tarea-info">' +
-        '<div class="info-item"><span class="info-label">Tipo</span><span class="info-value">'+val(t.Tipo_de_tarea)+'</span></div>' +
-        '<div class="info-item"><span class="info-label">Prioridad</span><span class="info-value">'+val(t.Prioridad)+'</span></div>' +
-        '<div class="info-item"><span class="info-label">Dominio</span><span class="info-value">'+(t.Dominio||'—')+'</span></div>' +
-        '<div class="info-item"><span class="info-label">Inicio</span><span class="info-value">'+(t.Fecha_de_inicio_de_tarea?formatFecha(t.Fecha_de_inicio_de_tarea)+' '+formatHora(t.Hora_de_inicio_de_tarea):'—')+'</span></div>' +
-        '<div class="info-item"><span class="info-label">Cierre</span><span class="info-value">'+(t.Fecha_de_fin_de_tarea?formatFecha(t.Fecha_de_fin_de_tarea)+' '+formatHora(t.Hora_de_fin_de_tareas):'—')+'</span></div>' +
-        '<div class="info-item"><span class="info-label">Intervenciones</span><span class="info-value">'+intervenciones.length+'</span></div>' +
-        '</div>' +
-        (descReal?'<div style="font-size:12px;margin-bottom:8px;padding:8px;background:#f8fafc;border-radius:4px;"><span style="color:#94a3b8;font-weight:600;display:block;margin-bottom:2px;">DESCRIPCIÓN REALIZADA</span>'+descReal+'</div>':'') +
-        (obs?'<div style="font-size:12px;margin-bottom:8px;padding:8px;background:#ede9fe;border-radius:4px;"><span style="color:#5b21b6;font-weight:600;display:block;margin-bottom:2px;">OBSERVACIÓN DE CIERRE</span>'+obs+'</div>':'') +
-        '<div class="seccion-titulo">CHECKLIST VEHÍCULO ('+checklists.length+')</div>' +
-        renderChecklist(checklists) +
-        '<div class="seccion-titulo">INTERVENCIONES / NOVEDADES ('+intervenciones.length+')</div>' +
-        intervsHtml +
-        (controlPolicial.length > 0 ?
-          '<div class="seccion-titulo">CONTROL DE PRESENCIA POLICIAL ('+controlPolicial.length+')</div>' +
-          '<table class="control-tabla"><thead><tr><th>Dependencia</th><th>Efectivos</th><th>Horario</th><th>Observación</th><th>Cargado por</th></tr></thead><tbody>' +
-          controlPolicial.map(function(cp) { return '<tr><td>'+(cp.Dependencia||'—')+'</td><td>'+(cp.Cantidad||'—')+'</td><td>'+(cp.Horario||'—')+'</td><td>'+(cp.Observacion||'—')+'</td><td>'+(cp.CargadoPorNombre||cp.CargadoPorEmail||'—')+'</td></tr>'; }).join('') +
-          '</tbody></table>' : '') +
-        '</div></div>';
+    tareas.forEach(item => {
+      const t = item.tarea || item;
+      const id = t.ID || t.id;
+      const intervenciones = item.intervenciones || [];
+      const controlPolicial = item.control_policial || [];
+      const checklists = checklistMap[id] || [];
+      const estado = val(t.Estado);
+      const estadoClass = getEstadoClass(estado);
+
+      const chofer1 = t.Chofer1 || '';
+      const chofer2 = t.CHOFER2 || t.chofer2 || '';
+      const chofer3 = t.Chofer3 || t.chofer3 || '';
+      const admin1  = t.Administrativo1 || '';
+      const admin2  = t.Administrativo2 || '';
+      const admin3  = t.Administrativo3 || '';
+      const getVal = (v) => v?.Value || v || '';
+      const listaOperarios = [getVal(chofer1), getVal(chofer2), getVal(chofer3), getVal(admin1), getVal(admin2), getVal(admin3)].filter(Boolean);
+      const operarios = listaOperarios.length > 0
+        ? listaOperarios.map(o => `<span style="display:inline-flex;align-items:center;gap:3px;background:#e8f0fb;color:#1a3a6b;border-radius:12px;padding:2px 8px;font-size:11px;font-weight:600;margin:1px;">👤 ${o}</span>`).join(' ')
+        : '<span style="color:#94a3b8">Sin asignar</span>';
+
+      const descripcionRealizada = t.Descripcion_de_tarea_realizada || t.descripcion_tarea_realizada || '';
+      const observacion = t.Observacion_cierre || t.observacion_cierre || '';
+
+      // Intervenciones
+      let intervsHtml = intervenciones.length === 0
+        ? '<div class="sin-datos">Sin intervenciones registradas</div>'
+        : intervenciones.map(iv => {
+            const hora = iv.Hora_Intervencion || iv.hora_intervencion || '';
+            const fecha_iv = iv.Fecha_Intervencion || iv.fecha_intervencion || '';
+            const desc = iv.Descripcion || iv.descripcion || '';
+            const lat = iv.GPS_Latitud || iv.gps_latitud;
+            const lng = iv.GPS_Longitud || iv.gps_longitud;
+            const cargadoPor = iv.CargadoPorNombre || iv.cargado_por_nombre || iv.CargadoPorEmail || '';
+            const fotos = iv.FotosCarpetaURL || iv.fotos_carpeta_url || '';
+            let meta = [];
+            if (lat) meta.push(`📍 ${parseFloat(lat).toFixed(4)}, ${parseFloat(lng).toFixed(4)}`);
+            if (cargadoPor) meta.push(`👤 ${cargadoPor}`);
+            if (fotos) meta.push(`<a href="${fotos}" target="_blank" style="color:#1a3a6b;">📷 Ver fotos</a>`);
+            return `<div class="intervencion">
+              <div class="intervencion-header">
+                <span class="intervencion-hora">${formatFecha(fecha_iv)} ${formatHora(hora)} hs</span>
+              </div>
+              <div class="intervencion-desc">${desc}</div>
+              ${meta.length ? `<div class="intervencion-meta">${meta.join(' &nbsp;·&nbsp; ')}</div>` : ''}
+            </div>`;
+          }).join('');
+
+      html += `<div class="tarea-bloque">
+        <div class="tarea-header">
+          <div>
+            <div class="tarea-titulo">${t.Title || t.titulo || 'Sin título'}</div>
+            <div class="tarea-meta" style="margin-top:4px;">ID #${id} · ${val(t.Turno)} · ${val(t.Concesi_x00f3_n) || '—'}</div>
+            <div style="margin-top:4px;display:flex;flex-wrap:wrap;gap:2px;">${operarios}</div>
+          </div>
+          <span class="estado-badge ${estadoClass}">${estado}</span>
+        </div>
+        <div class="tarea-body">
+          <div class="tarea-info">
+            <div class="info-item"><span class="info-label">Tipo</span><span class="info-value">${val(t.Tipo_de_tarea)}</span></div>
+            <div class="info-item"><span class="info-label">Prioridad</span><span class="info-value">${val(t.Prioridad)}</span></div>
+            <div class="info-item"><span class="info-label">Dominio</span><span class="info-value">${t.Dominio || '—'}</span></div>
+            <div class="info-item"><span class="info-label">Inicio</span><span class="info-value">${t.Fecha_de_inicio_de_tarea ? formatFecha(t.Fecha_de_inicio_de_tarea) + ' ' + formatHora(t.Hora_de_inicio_de_tarea) : '—'}</span></div>
+            <div class="info-item"><span class="info-label">Cierre</span><span class="info-value">${t.Fecha_de_fin_de_tarea ? formatFecha(t.Fecha_de_fin_de_tarea) + ' ' + formatHora(t.Hora_de_fin_de_tareas) : '—'}</span></div>
+            <div class="info-item"><span class="info-label">Intervenciones</span><span class="info-value">${intervenciones.length}</span></div>
+          </div>
+          ${descripcionRealizada ? `<div style="font-size:12px;margin-bottom:8px;padding:8px;background:#f8fafc;border-radius:4px;"><span style="color:#94a3b8;font-weight:600;display:block;margin-bottom:2px;">DESCRIPCIÓN REALIZADA</span>${descripcionRealizada}</div>` : ''}
+          ${observacion ? `<div style="font-size:12px;margin-bottom:8px;padding:8px;background:#ede9fe;border-radius:4px;"><span style="color:#5b21b6;font-weight:600;display:block;margin-bottom:2px;">OBSERVACIÓN DE CIERRE</span>${observacion}</div>` : ''}
+
+          <!-- CHECKLIST -->
+          <div class="seccion-titulo">CHECKLIST VEHÍCULO (${checklists.length})</div>
+          ${renderChecklist(checklists)}
+
+          <!-- INTERVENCIONES -->
+          <div class="seccion-titulo">INTERVENCIONES / NOVEDADES (${intervenciones.length})</div>
+          ${intervsHtml}
+
+          <!-- CONTROL POLICIAL -->
+          ${controlPolicial.length > 0 ? `
+          <div class="seccion-titulo">CONTROL DE PRESENCIA POLICIAL (${controlPolicial.length} puestos)</div>
+          <table class="control-tabla">
+            <thead><tr>
+              <th>Dependencia / Puesto</th><th>Efectivos</th><th>Horario</th><th>Observación</th><th>Cargado por</th>
+            </tr></thead>
+            <tbody>
+              ${controlPolicial.map(cp => `<tr>
+                <td>${cp.Dependencia || cp.dependencia || '—'}</td>
+                <td>${cp.Cantidad || cp.cantidad || '—'}</td>
+                <td>${cp.Horario || cp.horario || '—'}</td>
+                <td>${cp.Observacion || cp.observacion || '—'}</td>
+                <td>${cp.CargadoPorNombre || cp.CargadoPorEmail || '—'}</td>
+              </tr>`).join('')}
+            </tbody>
+          </table>` : ''}
+          ${(() => {
+            const registros = item.registros_policial || [];
+            if (registros.length === 0) return '';
+            return `<div class="seccion-titulo">REGISTROS POR LUGAR (${registros.length})</div>` +
+              registros.map(r => {
+                const lugar = r.Lugar || r.lugar || '—';
+                const obs = r.Observacion || r.observacion || '';
+                const fotoUrl = r.FotosCarpetaURL || r.fotos_carpeta_url || '';
+                const lat = r.GPS_Latitud || r.gps_latitud;
+                const lng = r.GPS_Longitud || r.gps_longitud;
+                let meta = [];
+                if (lat) meta.push(`📍 ${parseFloat(lat).toFixed(4)}, ${parseFloat(lng).toFixed(4)}`);
+                if (fotoUrl) meta.push(`<a href="${fotoUrl}" target="_blank" style="color:#1a3a6b;">📷 Ver fotos</a>`);
+                return `<div class="registro-lugar">
+                  <div class="registro-lugar-titulo">📍 ${lugar}</div>
+                  ${obs ? `<div style="font-size:11px;color:#374151;margin-bottom:4px;">${obs}</div>` : ''}
+                  ${meta.length ? `<div style="font-size:11px;color:#94a3b8;">${meta.join(' · ')}</div>` : ''}
+                </div>`;
+              }).join('');
+          })()}
+        </div>
+      </div>`;
     });
+
+    // Sección de novedades al final
+    if (novedades.length > 0) {
+      html += `<div class="seccion-novedades">
+        <div class="seccion-novedades-titulo">🚨 Novedades de Seguridad / Eventualidades (${novedades.length})</div>`;
+      novedades.forEach(n => {
+        const tipo = n.Tipo?.Value || n.Tipo || '—';
+        const detalle = n.Detalle || n.detalle || '';
+        const concesion = n.Concesion?.Value || n.Concesion || '';
+        const fecha = n.Fecha || '';
+        const cargadoPor = n.CargadoPorNombre && n.CargadoPorNombre.length < 40 ? n.CargadoPorNombre : (n.CargadoPorEmail || '');
+        const lat = n.GPS_Latitud;
+        const lng = n.GPS_Longitud;
+        const chofer1 = n.Chofer1 || '';
+        const admin1  = n.Administrativo1 || '';
+        const ops = [chofer1, admin1, n.Administrativo2, n.Administrativo3].filter(Boolean);
+        const operarios = ops.length > 0 ? ops.map(o => `<span style="background:#fee2e2;color:#991b1b;border-radius:12px;padding:2px 8px;font-size:11px;font-weight:600;margin:1px;display:inline-block;">👤 ${o}</span>`).join(' ') : '';
+        html += `<div class="novedad-bloque">
+          <div class="novedad-header">
+            <div>
+              <div class="novedad-tipo">🚨 ${tipo}</div>
+              <div style="font-size:11px;color:#6b7280;margin-top:3px;">${fecha}${concesion ? ' · ' + concesion : ''}${cargadoPor ? ' · ' + cargadoPor : ''}</div>
+              ${operarios ? `<div style="margin-top:4px;">${operarios}</div>` : ''}
+            </div>
+          </div>
+          <div class="novedad-body">
+            ${detalle ? `<div style="margin-bottom:6px;">${detalle}</div>` : ''}
+            ${lat ? `<div style="color:#94a3b8;font-size:11px;">📍 ${parseFloat(lat).toFixed(4)}, ${parseFloat(lng).toFixed(4)}</div>` : ''}
+          </div>
+        </div>`;
+      });
+      html += '</div>';
+    }
 
     contenido.innerHTML = html;
     document.getElementById('btnImprimir').style.display = 'inline-block';
-  } catch(e) {
-    contenido.innerHTML = '<div class="empty"><div class="empty-icon">⚠️</div><div>Error al cargar el reporte: '+e.message+'</div></div>';
+
+  } catch (e) {
+    contenido.innerHTML = `<div class="empty"><div class="empty-icon">⚠️</div><div>Error al cargar el reporte: ${e.message}</div></div>`;
   }
 }
 </script>
