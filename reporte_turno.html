@@ -231,8 +231,6 @@ var GET_EMPLEADOS_URL = 'https://default9444ead097714ed8a608802faff70d.4f.enviro
 var FLOW_URL = 'https://default9444ead097714ed8a608802faff70d.4f.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/b89902a8cdc84fd2b6c2fcc50d8b7818/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=LumCf2OdFu-BTnkPwlQ6DJIgxz7XxQXQByKvvmZ0jyQ';
 var GET_CHECKLIST_URL = 'https://default9444ead097714ed8a608802faff70d.4f.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/bf78f54bef08499eb5dc49bff2dc10eb/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=PhE5cBP9ZnY5ai0x2jgOqMrYYRerHjzIluTJQo4F4s4';
 var usuarioActual = null;
-var msalInstance = null;
-
 // ── MSAL CONFIG ──────────────────────────────────────────
 const msalConfig = {
   auth: {
@@ -243,7 +241,8 @@ const msalConfig = {
   cache: { cacheLocation: 'sessionStorage' }
 };
 
-const msalInstance = new msal.PublicClientApplication(msalConfig);
+var msalInstance = null;
+try { msalInstance = new msal.PublicClientApplication(msalConfig); } catch(e) { console.warn('MSAL no disponible:', e.message); }
 
 function loginAdmin() {
   var user = prompt('Usuario:');
