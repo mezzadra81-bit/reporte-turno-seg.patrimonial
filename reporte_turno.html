@@ -432,11 +432,15 @@ async function generarReporte() {
   document.getElementById('btnImprimir').style.display = 'none';
 
   try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 120000);
     const resp = await fetch(FLOW_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ turno, fechaDesde, fechaHasta })
+      body: JSON.stringify({ turno, fechaDesde, fechaHasta }),
+      signal: controller.signal
     });
+    clearTimeout(timeoutId);
 
     if (!resp.ok) throw new Error('Error ' + resp.status);
     const data = await resp.json();
