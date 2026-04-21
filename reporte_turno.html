@@ -437,7 +437,7 @@ async function generarReporte() {
     const resp = await fetch(FLOW_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ turno, fechaDesde: fechaDesde + 'T03:00:00Z', fechaHasta: fechaHasta + 'T02:59:59Z' }),
+      body: JSON.stringify({ turno, fechaDesde, fechaHasta }),
       signal: controller.signal
     });
     clearTimeout(timeoutId);
