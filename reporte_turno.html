@@ -475,13 +475,15 @@ async function generarReporte() {
       if (contadores[estado] !== undefined) contadores[estado]++;
     });
 
-    // Cargar checklists en paralelo
+    // Cargar checklists en paralelo — errores no bloquean el reporte
     const checklistMap = {};
-    await Promise.all(tareas.map(async item => {
-      const t = item.tarea || item;
-      const id = t.ID || t.id;
-      if (id) checklistMap[id] = await fetchChecklist(id);
-    }));
+    try {
+      await Promise.allSettled(tareas.map(async item => {
+        const t = item.tarea || item;
+        const id = t.ID || t.id;
+        if (id) { try { checklistMap[id] = await fetchChecklist(id); } catch(e) { checklistMap[id] = []; } }
+      }));
+    } catch(e) { console.warn('Error checklists:', e); }
 
     const turnoLabel = turno === 'Todos' ? 'Todos los turnos' : 'Turno ' + turno;
     let html = `<div class="reporte-titulo">Reporte ${turnoLabel} — ${fechaDesde} al ${fechaHasta}</div>`;
