@@ -180,8 +180,6 @@ window.addEventListener('load', async () => {
   if (!msalInstance) return;
   try {
     await msalInstance.initialize();
-    const response = await msalInstance.handleRedirectPromise();
-    if (response) { await verificarYMostrarApp(response.account); return; }
     const accounts = msalInstance.getAllAccounts();
     if (accounts.length > 0) { await verificarYMostrarApp(accounts[0]); }
   } catch(e) { console.warn('MSAL init error:', e.message); }
@@ -189,7 +187,7 @@ window.addEventListener('load', async () => {
 
 async function loginMicrosoft() {
   const btn = document.getElementById('btnLogin'); btn.disabled = true; mostrarError('');
-  try { await msalInstance.loginRedirect({ scopes: ['User.Read'] }); }
+  try { const response = await msalInstance.loginPopup({ scopes: ['User.Read'] }); await verificarYMostrarApp(response.account); }
   catch (e) { btn.disabled = false; mostrarError('Error al iniciar sesión.'); }
 }
 
@@ -214,7 +212,7 @@ async function verificarYMostrarApp(account) {
 }
 
 function mostrarError(msg) { const el = document.getElementById('loginError'); el.textContent = msg; el.style.display = msg ? 'block' : 'none'; }
-function logout() { usuarioActual = null; if (msalInstance) { try { msalInstance.logoutRedirect(); } catch(e) {} } document.getElementById('loginScreen').style.display = 'flex'; document.getElementById('appScreen').style.display = 'none'; }
+function logout() { usuarioActual = null; if (msalInstance) { try { msalInstance.logoutPopup(); } catch(e) {} } document.getElementById('loginScreen').style.display = 'flex'; document.getElementById('appScreen').style.display = 'none'; }
 
 function getEstadoClass(e) { return 'estado-' + (e || 'Abierto').replace(' ', '-'); }
 function formatFecha(f) { if (!f) return '—'; try { const p = f.split('T')[0]; if (p && p.length===10) { const [y,m,d]=p.split('-'); return d+'/'+m+'/'+y; } return new Date(f).toLocaleDateString('es-AR'); } catch(e) { return f; } }
