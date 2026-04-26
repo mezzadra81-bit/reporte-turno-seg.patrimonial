@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Reporte de Turno — Seguridad Patrimonial</title>
-<script src="https://alcdn.msauth.net/browser/2.38.3/js/msal-browser.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@azure/msal-browser@3.28.0/lib/msal-browser.min.js"></script>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: 'Segoe UI', Arial, sans-serif; background: #f0f2f5; color: #1a1a2e; }
@@ -181,8 +181,6 @@ window.addEventListener('load', async () => {
   if (!msalInstance) return;
   try {
     await msalInstance.initialize();
-    const response = await msalInstance.handleRedirectPromise();
-    if (response) { await verificarYMostrarApp(response.account); return; }
     const accounts = msalInstance.getAllAccounts();
     if (accounts.length > 0) { await verificarYMostrarApp(accounts[0]); }
   } catch(e) { console.warn('MSAL init error:', e.message); }
@@ -190,7 +188,7 @@ window.addEventListener('load', async () => {
 
 async function loginMicrosoft() {
   const btn = document.getElementById('btnLogin'); btn.disabled = true; mostrarError('');
-  try { await msalInstance.loginRedirect({ scopes: ['User.Read'] }); }
+  try { const response = await msalInstance.loginPopup({ scopes: ['User.Read'] }); await verificarYMostrarApp(response.account); }
   catch (e) { btn.disabled = false; mostrarError('Error al iniciar sesión.'); }
 }
 
@@ -215,7 +213,7 @@ async function verificarYMostrarApp(account) {
 }
 
 function mostrarError(msg) { const el = document.getElementById('loginError'); el.textContent = msg; el.style.display = msg ? 'block' : 'none'; }
-function logout() { usuarioActual = null; if (msalInstance) { try { msalInstance.logoutRedirect(); } catch(e) {} } document.getElementById('loginScreen').style.display = 'flex'; document.getElementById('appScreen').style.display = 'none'; }
+function logout() { usuarioActual = null; if (msalInstance) { try { msalInstance.logoutPopup(); } catch(e) {} } document.getElementById('loginScreen').style.display = 'flex'; document.getElementById('appScreen').style.display = 'none'; }
 
 function getEstadoClass(e) { return 'estado-' + (e || 'Abierto').replace(' ', '-'); }
 function formatFecha(f) { if (!f) return '—'; try { const p = f.split('T')[0]; if (p && p.length===10) { const [y,m,d]=p.split('-'); return d+'/'+m+'/'+y; } return new Date(f).toLocaleDateString('es-AR'); } catch(e) { return f; } }
@@ -268,17 +266,17 @@ async function fetchVigilancia(idAsignacion) {
 }
 
 function renderVigilancia(data) {
-  const registros = data.registros || [];
-  const puestos = data.puestos || [];
+  const registros = (data && data.registros) ? data.registros : [];
+  const puestos = (data && data.puestos) ? data.puestos : [];
   if (registros.length === 0) return '<div class="sin-datos">Sin registros de vigilancia privada</div>';
   return registros.map(function(r) {
-    var lugar = r.Lugar && r.Lugar.Value ? r.Lugar.Value : (r.Lugar || '—');
+    var lugar = (r.Lugar && r.Lugar.Value) ? r.Lugar.Value : (r.Lugar || '—');
     var fotoUrl = r.FotosCarpetaURL || '';
     var idReg = r.ID;
     var puestosReg = puestos.filter(function(p) { return String(p.IDRegistro) === String(idReg); });
     var puestosHtml = '';
     if (puestosReg.length > 0) {
-      puestosHtml = '<table class="control-tabla" style="margin-top:6px;"><thead><tr><th>Empresa</th><th>Cantidad</th><th>Horario</th><th>Observación</th></tr></thead><tbody>'+
+      puestosHtml = '<table class="control-tabla" style="margin-top:6px;"><thead><tr><th>Empresa</th><th>Cantidad</th><th>Horario</th><th>Observacion</th></tr></thead><tbody>'+
         puestosReg.map(function(p){ return '<tr><td>'+(p.Dependencia||'—')+'</td><td>'+(p.Cantidad||'—')+'</td><td>'+(p.Horario||'—')+'</td><td>'+(p.Observacion||'—')+'</td></tr>'; }).join('')+
         '</tbody></table>';
     }
@@ -320,14 +318,7 @@ async function generarReporte() {
     tareas.forEach(t => { const e = val(t.tarea?.Estado||t.Estado); if (contadores[e]!==undefined) contadores[e]++; });
 
     const checklistMap = {};
-    const vigilanciaMap = {};
-    try { await Promise.allSettled(tareas.map(async item => {
-      const t=item.tarea||item; const id=t.ID||t.id;
-      if(id){
-        try{checklistMap[id]=await fetchChecklist(id);}catch(e){checklistMap[id]=[];}
-        try{vigilanciaMap[id]=await fetchVigilancia(id);}catch(e){vigilanciaMap[id]={registros:[],puestos:[]};}
-      }
-    })); } catch(e) {}
+    try { await Promise.allSettled(tareas.map(async item => { const t=item.tarea||item; const id=t.ID||t.id; if(id){try{checklistMap[id]=await fetchChecklist(id);}catch(e){checklistMap[id]=[];}} })); } catch(e) {}
 
     let html = '<div class="reporte-titulo">Reporte — '+fechaDesde+' al '+fechaHasta+'</div>';
     html += '<div class="resumen-cards"><div class="card total"><div class="card-num">'+contadores.total+'</div><div class="card-label">Total</div></div><div class="card abierto"><div class="card-num">'+contadores['Abierto']+'</div><div class="card-label">Abiertas</div></div><div class="card en-curso"><div class="card-num">'+contadores['En curso']+'</div><div class="card-label">En curso</div></div><div class="card cerrada"><div class="card-num">'+contadores['Cerrada']+'</div><div class="card-label">Cerradas</div></div><div class="card resuelta"><div class="card-num">'+contadores['Resuelta']+'</div><div class="card-label">Resueltas</div></div></div>';
@@ -339,7 +330,7 @@ async function generarReporte() {
       const intervenciones = item.intervenciones || [];
       const controlPolicial = item.control_policial || [];
       const registrosPolicial = item.registros_policial || [];
-      const vigilanciaData = vigilanciaMap[id] || { registros: [], puestos: [] };
+      const vigilanciaData = { registros: item.registros_vigilancia || [], puestos: item.control_vigilancia || [] };
       const checklists = checklistMap[id] || [];
       const estadoVal = val(t.Estado);
       const getV = v => v?.Value||v||'';
@@ -431,7 +422,6 @@ async function generarReporte() {
         '<div class="seccion-toggle" style="background:#f0fdf4;border-color:#bbf7d0;color:#166534;" data-target="sec'+idxCp+'" onclick="toggleSeccion(\'sec'+idxCp+'\')">'+
         '<span>🚔 CONTROL POLICIAL ('+controlPolicial.length+' puestos)</span><span class="toggle-icon">▼</span></div>'+
         '<div id="sec'+idxCp+'" class="seccion-contenido collapsed"><div class="seccion-inner">'+cpHtml+'</div></div>'+
-        // VIGILANCIA PRIVADA
         '<div class="seccion-toggle" style="background:#f5f3ff;border-color:#ddd6fe;color:#5b21b6;" data-target="sec'+idxVg+'" onclick="toggleSeccion(\'sec'+idxVg+'\')">'+
         '<span>🔒 VIGILANCIA PRIVADA ('+vigilanciaData.registros.length+' registros)</span><span class="toggle-icon">▼</span></div>'+
         '<div id="sec'+idxVg+'" class="seccion-contenido collapsed"><div class="seccion-inner">'+renderVigilancia(vigilanciaData)+'</div></div>'+
