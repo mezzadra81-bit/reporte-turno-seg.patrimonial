@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Reporte de Turno — Seguridad Patrimonial</title>
-<script src="https://cdn.jsdelivr.net/npm/@azure/msal-browser@3.28.0/lib/msal-browser.min.js"></script>
+<script src="https://alcdn.msauth.net/browser/2.38.3/js/msal-browser.min.js"></script>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: 'Segoe UI', Arial, sans-serif; background: #f0f2f5; color: #1a1a2e; }
@@ -154,6 +154,7 @@
 var GET_EMPLEADOS_URL = 'https://default9444ead097714ed8a608802faff70d.4f.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/54a1c9328080444e8a9c76c509118e60/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=9aQMa6iAlNu7cjaLQjUEUS3IvVOg6E1MJtKtaqpOpEo';
 var FLOW_URL = 'https://default9444ead097714ed8a608802faff70d.4f.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/b89902a8cdc84fd2b6c2fcc50d8b7818/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=LumCf2OdFu-BTnkPwlQ6DJIgxz7XxQXQByKvvmZ0jyQ';
 var GET_CHECKLIST_URL = 'https://default9444ead097714ed8a608802faff70d.4f.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/bf78f54bef08499eb5dc49bff2dc10eb/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=PhE5cBP9ZnY5ai0x2jgOqMrYYRerHjzIluTJQo4F4s4';
+var GET_VIGILANCIA_URL = 'https://default9444ead097714ed8a608802faff70d.4f.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/fb668c40a0d94daca6a8dae8ba5b809d/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=s3Jn0dtGjeq2p_aRQkgjary2HJxkN8I1W_qrsj2fhWk';
 var usuarioActual = null;
 var msalInstance = null;
 
@@ -180,6 +181,8 @@ window.addEventListener('load', async () => {
   if (!msalInstance) return;
   try {
     await msalInstance.initialize();
+    const response = await msalInstance.handleRedirectPromise();
+    if (response) { await verificarYMostrarApp(response.account); return; }
     const accounts = msalInstance.getAllAccounts();
     if (accounts.length > 0) { await verificarYMostrarApp(accounts[0]); }
   } catch(e) { console.warn('MSAL init error:', e.message); }
@@ -187,7 +190,7 @@ window.addEventListener('load', async () => {
 
 async function loginMicrosoft() {
   const btn = document.getElementById('btnLogin'); btn.disabled = true; mostrarError('');
-  try { const response = await msalInstance.loginPopup({ scopes: ['User.Read'] }); await verificarYMostrarApp(response.account); }
+  try { await msalInstance.loginRedirect({ scopes: ['User.Read'] }); }
   catch (e) { btn.disabled = false; mostrarError('Error al iniciar sesión.'); }
 }
 
@@ -212,7 +215,7 @@ async function verificarYMostrarApp(account) {
 }
 
 function mostrarError(msg) { const el = document.getElementById('loginError'); el.textContent = msg; el.style.display = msg ? 'block' : 'none'; }
-function logout() { usuarioActual = null; if (msalInstance) { try { msalInstance.logoutPopup(); } catch(e) {} } document.getElementById('loginScreen').style.display = 'flex'; document.getElementById('appScreen').style.display = 'none'; }
+function logout() { usuarioActual = null; if (msalInstance) { try { msalInstance.logoutRedirect(); } catch(e) {} } document.getElementById('loginScreen').style.display = 'flex'; document.getElementById('appScreen').style.display = 'none'; }
 
 function getEstadoClass(e) { return 'estado-' + (e || 'Abierto').replace(' ', '-'); }
 function formatFecha(f) { if (!f) return '—'; try { const p = f.split('T')[0]; if (p && p.length===10) { const [y,m,d]=p.split('-'); return d+'/'+m+'/'+y; } return new Date(f).toLocaleDateString('es-AR'); } catch(e) { return f; } }
@@ -255,6 +258,40 @@ function renderChecklist(registros) {
   }).join('');
 }
 
+async function fetchVigilancia(idAsignacion) {
+  try {
+    const resp = await fetch(GET_VIGILANCIA_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ idAsignacion: Number(idAsignacion) }) });
+    if (!resp.ok) return { registros: [], puestos: [] };
+    const data = await resp.json();
+    return { registros: data.registros || [], puestos: data.puestos || [] };
+  } catch { return { registros: [], puestos: [] }; }
+}
+
+function renderVigilancia(data) {
+  const registros = data.registros || [];
+  const puestos = data.puestos || [];
+  if (registros.length === 0) return '<div class="sin-datos">Sin registros de vigilancia privada</div>';
+  return registros.map(function(r) {
+    var lugar = r.Lugar && r.Lugar.Value ? r.Lugar.Value : (r.Lugar || '—');
+    var fotoUrl = r.FotosCarpetaURL || '';
+    var idReg = r.ID;
+    var puestosReg = puestos.filter(function(p) { return String(p.IDRegistro) === String(idReg); });
+    var puestosHtml = '';
+    if (puestosReg.length > 0) {
+      puestosHtml = '<table class="control-tabla" style="margin-top:6px;"><thead><tr><th>Empresa</th><th>Cantidad</th><th>Horario</th><th>Observación</th></tr></thead><tbody>'+
+        puestosReg.map(function(p){ return '<tr><td>'+(p.Dependencia||'—')+'</td><td>'+(p.Cantidad||'—')+'</td><td>'+(p.Horario||'—')+'</td><td>'+(p.Observacion||'—')+'</td></tr>'; }).join('')+
+        '</tbody></table>';
+    }
+    return '<div class="registro-lugar" style="border-left-color:#7c3aed;">'+
+      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">'+
+      '<div class="registro-lugar-titulo" style="color:#5b21b6;">🔒 '+lugar+'</div>'+
+      (fotoUrl?'<a href="'+fotoUrl+'" target="_blank" style="font-size:11px;color:#5b21b6;font-weight:600;">📷 Ver fotos</a>':'')+
+      '</div>'+
+      (r.Observacion?'<div style="font-size:11px;color:#374151;margin-bottom:4px;">'+r.Observacion+'</div>':'')+
+      puestosHtml+'</div>';
+  }).join('');
+}
+
 async function generarReporte() {
   const turno = document.getElementById('selTurno').value;
   const estado = document.getElementById('selEstado').value;
@@ -283,7 +320,14 @@ async function generarReporte() {
     tareas.forEach(t => { const e = val(t.tarea?.Estado||t.Estado); if (contadores[e]!==undefined) contadores[e]++; });
 
     const checklistMap = {};
-    try { await Promise.allSettled(tareas.map(async item => { const t=item.tarea||item; const id=t.ID||t.id; if(id){try{checklistMap[id]=await fetchChecklist(id);}catch(e){checklistMap[id]=[];}} })); } catch(e) {}
+    const vigilanciaMap = {};
+    try { await Promise.allSettled(tareas.map(async item => {
+      const t=item.tarea||item; const id=t.ID||t.id;
+      if(id){
+        try{checklistMap[id]=await fetchChecklist(id);}catch(e){checklistMap[id]=[];}
+        try{vigilanciaMap[id]=await fetchVigilancia(id);}catch(e){vigilanciaMap[id]={registros:[],puestos:[]};}
+      }
+    })); } catch(e) {}
 
     let html = '<div class="reporte-titulo">Reporte — '+fechaDesde+' al '+fechaHasta+'</div>';
     html += '<div class="resumen-cards"><div class="card total"><div class="card-num">'+contadores.total+'</div><div class="card-label">Total</div></div><div class="card abierto"><div class="card-num">'+contadores['Abierto']+'</div><div class="card-label">Abiertas</div></div><div class="card en-curso"><div class="card-num">'+contadores['En curso']+'</div><div class="card-label">En curso</div></div><div class="card cerrada"><div class="card-num">'+contadores['Cerrada']+'</div><div class="card-label">Cerradas</div></div><div class="card resuelta"><div class="card-num">'+contadores['Resuelta']+'</div><div class="card-label">Resueltas</div></div></div>';
@@ -295,6 +339,7 @@ async function generarReporte() {
       const intervenciones = item.intervenciones || [];
       const controlPolicial = item.control_policial || [];
       const registrosPolicial = item.registros_policial || [];
+      const vigilanciaData = vigilanciaMap[id] || { registros: [], puestos: [] };
       const checklists = checklistMap[id] || [];
       const estadoVal = val(t.Estado);
       const getV = v => v?.Value||v||'';
@@ -310,7 +355,7 @@ async function generarReporte() {
       const descReal = t.Descripcion_de_tarea_realizada || '';
       const obs = t.Observacion_cierre || '';
 
-      const idxCh = seccionIdx+'ch'; const idxIv = seccionIdx+'iv'; const idxCp = seccionIdx+'cp';
+      const idxCh = seccionIdx+'ch'; const idxIv = seccionIdx+'iv'; const idxCp = seccionIdx+'cp'; const idxVg = seccionIdx+'vg';
 
       // Intervenciones HTML
       const intervsHtml = intervenciones.length === 0 ? '<div class="sin-datos">Sin intervenciones registradas</div>' :
@@ -386,6 +431,10 @@ async function generarReporte() {
         '<div class="seccion-toggle" style="background:#f0fdf4;border-color:#bbf7d0;color:#166534;" data-target="sec'+idxCp+'" onclick="toggleSeccion(\'sec'+idxCp+'\')">'+
         '<span>🚔 CONTROL POLICIAL ('+controlPolicial.length+' puestos)</span><span class="toggle-icon">▼</span></div>'+
         '<div id="sec'+idxCp+'" class="seccion-contenido collapsed"><div class="seccion-inner">'+cpHtml+'</div></div>'+
+        // VIGILANCIA PRIVADA
+        '<div class="seccion-toggle" style="background:#f5f3ff;border-color:#ddd6fe;color:#5b21b6;" data-target="sec'+idxVg+'" onclick="toggleSeccion(\'sec'+idxVg+'\')">'+
+        '<span>🔒 VIGILANCIA PRIVADA ('+vigilanciaData.registros.length+' registros)</span><span class="toggle-icon">▼</span></div>'+
+        '<div id="sec'+idxVg+'" class="seccion-contenido collapsed"><div class="seccion-inner">'+renderVigilancia(vigilanciaData)+'</div></div>'+
         '</div></div>';
 
       seccionIdx++;
