@@ -443,7 +443,9 @@ async function generarReporte() {
           '<div class="novedad-tipo">🚨 '+tipo+'</div>'+
           '<div style="font-size:11px;color:#6b7280;margin-top:3px;">'+(n.Fecha||'')+(concesion?' · '+concesion:'')+(cargadoPor?' · '+cargadoPor:'')+'</div>'+
           (operariosNov?'<div style="margin-top:4px;">'+operariosNov+'</div>':'')+
-          '</div></div><div class="novedad-body">'+
+          '</div>'+
+          (n.FotosCarpetaURL?'<a href="'+n.FotosCarpetaURL+'" target="_blank" style="font-size:11px;color:#dc2626;font-weight:600;white-space:nowrap;">📷 Ver fotos</a>':'')+
+          '</div><div class="novedad-body">'+
           (n.Detalle?'<div style="margin-bottom:6px;">'+n.Detalle+'</div>':'')+
           (n.GPS_Latitud?'<div style="color:#94a3b8;font-size:11px;">📍 <a href="https://www.google.com/maps?q='+parseFloat(n.GPS_Latitud)+','+parseFloat(n.GPS_Longitud)+'" target="_blank" style="color:#3b82f6;text-decoration:none;">'+parseFloat(n.GPS_Latitud).toFixed(4)+', '+parseFloat(n.GPS_Longitud).toFixed(4)+'</a></div>':'')+
           '</div></div>';
