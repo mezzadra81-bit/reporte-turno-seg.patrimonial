@@ -217,7 +217,7 @@ body { font-family: 'Segoe UI', Arial, sans-serif; background: #f0f2f5; color: #
   <div class="nav-tabs">
     <div class="nav-tab active" id="tabDashboard" onclick="showTab('dashboard')" style="display:none">📊 Dashboard</div>
     <div class="nav-tab" onclick="showTab('reporte')">📋 Reporte de turno</div>
-    <div class="nav-tab" onclick="showTab('usuarios')" id="tabUsuarios" style="display:none">👥 Usuarios</div>
+    <div class="nav-tab" onclick="showTab('usuarios');cargarUsuarios();" id="tabUsuarios" style="display:none">👥 Usuarios</div>
   </div>
 
   <!-- DASHBOARD -->
@@ -846,8 +846,20 @@ async function toggleActivo(id, estadoActual) {
   const nuevoEstado = estadoActual === 'Si' ? 'No' : 'Si';
   const accion = nuevoEstado === 'No' ? 'desactivar' : 'activar';
   if (!confirm('¿Querés '+accion+' este usuario?')) return;
+  const e = todosEmpleados.find(u => u.ID === id);
+  if (!e) return;
   try {
-    await fetch(PUT_EMPLEADO_URL, {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({ID:id,Activo:nuevoEstado})});
+    const concesiones = Array.isArray(e.field_4) ? e.field_4.map(c=>c?.Value||c).filter(Boolean) : [e.field_4?.Value||(typeof e.field_4==='string'?e.field_4:null)].filter(Boolean);
+    await fetch(PUT_EMPLEADO_URL, {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
+      ID: id,
+      Nombre: e.Title || '',
+      Email: e.email || '',
+      Legajo: e.field_1 || null,
+      Puesto: e.field_2?.Value || e.field_2 || '',
+      Rol: e.field_3?.Value || e.field_3 || '',
+      Activo: nuevoEstado,
+      Concesion: concesiones,
+    })});
     showToast('Usuario '+(nuevoEstado==='Si'?'activado':'desactivado'), 'success');
     await cargarUsuarios();
   } catch(e) { showToast('Error: '+e.message, 'error'); }
