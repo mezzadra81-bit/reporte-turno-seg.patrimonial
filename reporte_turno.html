@@ -410,7 +410,7 @@ function mostrarApp(nombre) {
   if (rolActual === 'jefatura') {
     document.getElementById('tabUsuarios').style.display = 'block';
     document.getElementById('tabDashboard').style.display = 'block';
-  } else if (rolActual === 'supervisor') {
+  } else if (rolActual === 'supervisor' || rolActual === 'admin') {
     document.getElementById('tabUsuarios').style.display = 'block';
     document.getElementById('tabDashboard').style.display = 'none';
   } else {
