@@ -726,12 +726,15 @@ var empleadoEditando = null;
 
 async function cargarUsuarios() {
   try {
-    const resp = await fetch(GET_EMPLEADOS_LOGIN_URL, {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({})});
+    const controller = new AbortController();
+    const toid = setTimeout(() => controller.abort(), 30000);
+    const resp = await fetch(GET_EMPLEADOS_URL, {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({}),signal:controller.signal});
+    clearTimeout(toid);
     const data = await resp.json();
-    todosEmpleados = Array.isArray(data) ? data : (data?.value || []);
+    todosEmpleados = Array.isArray(data) ? data : (data?.body?.empleados || data?.empleados || data?.value || []);
     renderTablaUsuarios(todosEmpleados);
   } catch(e) {
-    document.getElementById('tablaUsuariosContenido').innerHTML = '<div class="empty"><div class="empty-icon">⚠️</div><div>Error al cargar usuarios: '+e.message+'</div></div>';
+    document.getElementById('tablaUsuariosContenido').innerHTML = '<div class="empty"><div class="empty-icon">⚠️</div><div>Error al cargar usuarios: '+e.message+'<br><button class="btn btn-primary" style="margin-top:12px" onclick="cargarUsuarios()">Reintentar</button></div></div>';
   }
 }
 
