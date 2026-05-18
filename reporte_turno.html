@@ -1,4 +1,4 @@
-¿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
 <meta charset="UTF-8">
@@ -340,6 +340,7 @@ body { font-family: 'Segoe UI', Arial, sans-serif; background: #f0f2f5; color: #
 var GET_EMPLEADOS_URL  = 'https://default9444ead097714ed8a608802faff70d.4f.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/aee7e5b3180f4e7bbcf754ef53650dac/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=hoN1MoVqFOvcTzzRMvwK1yFnjrF8zl08qHvwszdLYRQ';
 var POST_EMPLEADO_URL  = 'https://default9444ead097714ed8a608802faff70d.4f.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/71178a2c84bc48fb946532ca4d1adcb3/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=x3u9oFIj5uwsAJ7YKe8I0YUFoUntpYiPrsySEckIt7k';
 var PUT_EMPLEADO_URL   = 'https://default9444ead097714ed8a608802faff70d.4f.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/e50de6114192401ea6a14ffd698322dd/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=u9O4plQ1EC15XTWh_Z5Ggn2j9AWLjOnjYiQtJSuMC5Q';
+var PUT_ESTADO_EMPLEADO_URL = 'https://default9444ead097714ed8a608802faff70d.4f.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/e45040a4dc38462da7115ad618af95ed/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=phIXwPPWExUG383HqcjtyhDhuv00iSrybW4QSsfthUA';
 var GET_EMPLEADOS_LOGIN_URL = 'https://default9444ead097714ed8a608802faff70d.4f.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/54a1c9328080444e8a9c76c509118e60/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=9aQMa6iAlNu7cjaLQjUEUS3IvVOg6E1MJtKtaqpOpEo';
 var FLOW_REPORTE_URL   = 'https://default9444ead097714ed8a608802faff70d.4f.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/b89902a8cdc84fd2b6c2fcc50d8b7818/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=LumCf2OdFu-BTnkPwlQ6DJIgxz7XxQXQByKvvmZ0jyQ';
 var GET_CHECKLIST_URL  = 'https://default9444ead097714ed8a608802faff70d.4f.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/bf78f54bef08499eb5dc49bff2dc10eb/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=PhE5cBP9ZnY5ai0x2jgOqMrYYRerHjzIluTJQo4F4s4';
@@ -849,14 +850,9 @@ async function toggleActivo(id, estadoActual) {
   const e = todosEmpleados.find(u => u.ID === id);
   if (!e) return;
   try {
-    await fetch(PUT_EMPLEADO_URL, {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
-      ID: id,
-      Nombre: e.Title || '',
-      Email: e.email || '',
-      Legajo: e.field_1 || null,
-      Puesto: e.field_2?.Value || e.field_2 || '',
-      Rol: e.field_3?.Value || e.field_3 || '',
-      Activo: nuevoEstado,
+    await fetch(PUT_ESTADO_EMPLEADO_URL, {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
+      id: id,
+      activo: nuevoEstado,
     })});
     showToast('Usuario '+(nuevoEstado==='Si'?'activado':'desactivado'), 'success');
     await cargarUsuarios();
