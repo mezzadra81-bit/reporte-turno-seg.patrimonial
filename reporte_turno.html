@@ -215,7 +215,7 @@ body { font-family: 'Segoe UI', Arial, sans-serif; background: #f0f2f5; color: #
   </div>
 
   <div class="nav-tabs">
-    <div class="nav-tab active" onclick="showTab('dashboard')">📊 Dashboard</div>
+    <div class="nav-tab active" id="tabDashboard" onclick="showTab('dashboard')" style="display:none">📊 Dashboard</div>
     <div class="nav-tab" onclick="showTab('reporte')">📋 Reporte de turno</div>
     <div class="nav-tab" onclick="showTab('usuarios')" id="tabUsuarios" style="display:none">👥 Usuarios</div>
   </div>
@@ -405,12 +405,25 @@ function mostrarApp(nombre) {
   document.getElementById('userInfo').textContent = '👤 ' + nombre;
   document.getElementById('loginScreen').style.display = 'none';
   document.getElementById('appScreen').style.display = 'block';
-  // Solo jefatura y supervisor ven gestión de usuarios
-  if (rolActual === 'jefatura' || rolActual === 'supervisor') {
+  // Solo jefatura ve dashboard y usuarios
+  if (rolActual === 'jefatura') {
     document.getElementById('tabUsuarios').style.display = 'block';
+    document.getElementById('tabDashboard').style.display = 'block';
+  } else if (rolActual === 'supervisor') {
+    document.getElementById('tabUsuarios').style.display = 'block';
+    document.getElementById('tabDashboard').style.display = 'none';
+  } else {
+    document.getElementById('tabDashboard').style.display = 'none';
   }
-  var hoy = new Date().toISOString().split('T')[0];
-  document.getElementById('selFechaDesde').value = hoy;
+  // Tab inicial según rol
+  if (rolActual === 'jefatura') {
+    document.getElementById('panel-dashboard').classList.add('active');
+    document.getElementById('tabDashboard').classList.add('active');
+  } else {
+    document.getElementById('panel-dashboard').classList.remove('active');
+    document.getElementById('panel-reporte').classList.add('active');
+    document.querySelector('.nav-tab:not([id])').classList.add('active');
+  }
   document.getElementById('selFechaHasta').value = hoy;
   document.getElementById('dashDesde').value = hoy;
   document.getElementById('dashHasta').value = hoy;
@@ -713,7 +726,7 @@ var empleadoEditando = null;
 
 async function cargarUsuarios() {
   try {
-    const resp = await fetch(GET_EMPLEADOS_URL, {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({})});
+    const resp = await fetch(GET_EMPLEADOS_LOGIN_URL, {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({})});
     const data = await resp.json();
     todosEmpleados = Array.isArray(data) ? data : (data?.value || []);
     renderTablaUsuarios(todosEmpleados);
