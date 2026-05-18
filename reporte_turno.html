@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+¿<!DOCTYPE html>
 <html lang="es">
 <head>
 <meta charset="UTF-8">
@@ -849,7 +849,6 @@ async function toggleActivo(id, estadoActual) {
   const e = todosEmpleados.find(u => u.ID === id);
   if (!e) return;
   try {
-    const concesiones = Array.isArray(e.field_4) ? e.field_4.map(c=>c?.Value||c).filter(Boolean) : [e.field_4?.Value||(typeof e.field_4==='string'?e.field_4:null)].filter(Boolean);
     await fetch(PUT_EMPLEADO_URL, {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
       ID: id,
       Nombre: e.Title || '',
@@ -858,7 +857,6 @@ async function toggleActivo(id, estadoActual) {
       Puesto: e.field_2?.Value || e.field_2 || '',
       Rol: e.field_3?.Value || e.field_3 || '',
       Activo: nuevoEstado,
-      Concesion: concesiones,
     })});
     showToast('Usuario '+(nuevoEstado==='Si'?'activado':'desactivado'), 'success');
     await cargarUsuarios();
