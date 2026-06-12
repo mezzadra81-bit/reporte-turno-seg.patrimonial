@@ -70,9 +70,7 @@ body { font-family: 'Segoe UI', Arial, sans-serif; background: #f0f2f5; color: #
 .estado-pill-val { font-size: 14px; font-weight: 700; }
 /* MAPA */
 #mapaNovedades { height: 380px; border-radius: 8px; overflow: hidden; }
-.mapa-leyenda { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 10px; font-size: 12px; color: #374151; }
-.mapa-leyenda-item { display: flex; align-items: center; gap: 6px; }
-.mapa-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
+#mapaLeyenda { scrollbar-width: thin; scrollbar-color: #cbd5e1 transparent; }
 /* REPORTE */
 .tarea-bloque { background: white; border-radius: 10px; margin-bottom: 16px; overflow: hidden; border: 1px solid #e2e8f0; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
 .tarea-header { padding: 14px 18px; display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; border-bottom: 1px solid #f1f5f9; background: #fafbff; }
@@ -469,45 +467,110 @@ function getConcesionColor(c) {
   return '#64748b';
 }
 
+// Paleta para tipos de novedad
+var TIPO_COLORS = {};
+var TIPO_PALETTE = ['#7c3aed','#ea580c','#0891b2','#be185d','#65a30d','#b45309','#0e7490','#9333ea','#c2410c','#047857'];
+var tipoColorIdx = 0;
+function getTipoColor(tipo) {
+  if (!tipo) return '#64748b';
+  if (!TIPO_COLORS[tipo]) {
+    TIPO_COLORS[tipo] = TIPO_PALETTE[tipoColorIdx % TIPO_PALETTE.length];
+    tipoColorIdx++;
+  }
+  return TIPO_COLORS[tipo];
+}
+
+var tiposFiltroActivos = new Set(); // vacío = todos visibles
+
+// novedadesMapaData: todas las novedades con GPS del período actual
+var novedadesMapaData = [];
+
 function renderMapa(novedades) {
+  if (!dashMap) return;
+  TIPO_COLORS = {}; tipoColorIdx = 0; // reset palette each render
+  dashMarkers.forEach(m => dashMap.removeLayer(m));
+  dashMarkers = [];
+  novedadesMapaData = novedades.filter(n => n.GPS_Latitud && n.GPS_Longitud);
+
+  // Pre-assign colors in sorted order for consistency
+  const tiposPresentes = [...new Set(novedadesMapaData.map(n => n.Tipo?.Value || n.Tipo || 'Sin tipo'))].sort();
+  tiposPresentes.forEach(t => getTipoColor(t));
+
+  aplicarFiltroMapa();
+  renderLeyendaMapa(tiposPresentes);
+}
+
+function aplicarFiltroMapa() {
   if (!dashMap) return;
   dashMarkers.forEach(m => dashMap.removeLayer(m));
   dashMarkers = [];
-  const conGPS = novedades.filter(n => n.GPS_Latitud && n.GPS_Longitud);
-  if (!conGPS.length) return;
   const bounds = [];
-  conGPS.forEach(n => {
+
+  novedadesMapaData.forEach(n => {
+    const tipo = n.Tipo?.Value || n.Tipo || 'Sin tipo';
+    if (tiposFiltroActivos.size > 0 && !tiposFiltroActivos.has(tipo)) return;
     const lat = parseFloat(n.GPS_Latitud);
     const lng = parseFloat(n.GPS_Longitud);
     if (isNaN(lat) || isNaN(lng)) return;
+
+    const color = getTipoColor(tipo);
     const con = n.Concesion?.Value || n.Concesion || '';
-    const color = getConcesionColor(con);
-    const tipo = n.Tipo?.Value || n.Tipo || 'Novedad';
     const fecha = n.Fecha ? n.Fecha.split('T')[0].split('-').reverse().join('/') : '';
     const hora = n.Hora ? n.Hora.substring(0,5) : '';
-    // Label visible sobre el pin
-    const tipoCorto = tipo.length > 18 ? tipo.substring(0,16) + '…' : tipo;
-    const markerHtml =
-      '<div style="position:relative;display:inline-block">' +
-        '<svg xmlns="http://www.w3.org/2000/svg" width="28" height="36" viewBox="0 0 28 36">' +
-          '<path d="M14 0C6.3 0 0 6.3 0 14c0 9.9 14 22 14 22S28 23.9 28 14C28 6.3 21.7 0 14 0z" fill="' + color + '" stroke="white" stroke-width="2"/>' +
-          '<circle cx="14" cy="14" r="6" fill="white"/>' +
-        '</svg>' +
-        '<div style="position:absolute;bottom:38px;left:50%;transform:translateX(-50%);background:' + color + ';color:white;font-size:9px;font-weight:700;white-space:nowrap;padding:2px 5px;border-radius:4px;pointer-events:none;box-shadow:0 1px 3px rgba(0,0,0,0.3)">' +
-          tipoCorto +
-        '</div>' +
+
+    const circleHtml =
+      '<div title="' + tipo + (con ? ' · ' + con : '') + (fecha ? ' · ' + fecha : '') + '" ' +
+      'style="width:18px;height:18px;border-radius:50%;background:' + color + ';border:2.5px solid white;box-shadow:0 1px 4px rgba(0,0,0,0.35);cursor:pointer"></div>';
+    const icon = L.divIcon({ html: circleHtml, iconSize:[18,18], iconAnchor:[9,9], popupAnchor:[0,-12], className:'' });
+
+    const detalle = n.Detalle ? n.Detalle.substring(0,120) + (n.Detalle.length > 120 ? '...' : '') : '';
+    const tooltipHtml =
+      '<div style="font-size:12px;min-width:160px;max-width:220px">' +
+      '<strong style="color:' + color + '">' + tipo + '</strong>' +
+      (con ? '<br><span style="color:#64748b">' + con + '</span>' : '') +
+      '<br>' + fecha + (hora ? ' · ' + hora + ' hs' : '') +
+      (detalle ? '<div style="margin-top:4px;color:#374151">' + detalle + '</div>' : '') +
       '</div>';
-    const icon = L.divIcon({ html: markerHtml, iconSize:[28,74], iconAnchor:[14,72], popupAnchor:[0,-72], className:'' });
-    const detalle = n.Detalle ? n.Detalle.substring(0,100) + (n.Detalle.length > 100 ? '...' : '') : '';
-    const popup = '<div style="font-size:12px;min-width:160px"><strong style="color:' + color + '">' + tipo + '</strong><br>' +
-      fecha + (hora ? ' · ' + hora + ' hs' : '') + '<br>' +
-      (con ? '<span style="color:#64748b">' + con + '</span><br>' : '') +
-      (detalle ? '<div style="margin-top:4px;color:#374151">' + detalle + '</div>' : '') + '</div>';
-    const marker = L.marker([lat, lng], {icon}).addTo(dashMap).bindPopup(popup);
+
+    const marker = L.marker([lat, lng], {icon})
+      .addTo(dashMap)
+      .bindTooltip(tooltipHtml, {direction:'top', offset:[0,-10]});
     dashMarkers.push(marker);
     bounds.push([lat, lng]);
   });
-  if (bounds.length > 0) dashMap.fitBounds(bounds, {padding:[30,30], maxZoom:13});
+
+  if (bounds.length > 0 && dashMarkers.length === novedadesMapaData.length) {
+    dashMap.fitBounds(bounds, {padding:[30,30], maxZoom:13});
+  }
+}
+
+function renderLeyendaMapa(tipos) {
+  const leyenda = document.getElementById('mapaLeyenda');
+  if (!leyenda) return;
+  leyenda.innerHTML = '<div style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px">Tipo de novedad</div>' +
+    tipos.map(t => {
+      const color = getTipoColor(t);
+      const activo = tiposFiltroActivos.size === 0 || tiposFiltroActivos.has(t);
+      return '<div onclick="toggleTipoFiltro('' + t.replace(/'/g, "\'") + '')" ' +
+        'style="display:flex;align-items:center;gap:8px;padding:5px 8px;border-radius:6px;cursor:pointer;margin-bottom:3px;' +
+        'background:' + (activo ? color + '18' : '#f1f5f9') + ';' +
+        'border:1.5px solid ' + (activo ? color + '60' : '#e2e8f0') + ';' +
+        'opacity:' + (activo ? '1' : '0.45') + ';transition:all 0.15s">' +
+        '<div style="width:12px;height:12px;border-radius:50%;background:' + color + ';flex-shrink:0;border:2px solid white;box-shadow:0 1px 3px rgba(0,0,0,0.2)"></div>' +
+        '<span style="font-size:11px;font-weight:600;color:#374151;line-height:1.2">' + t + '</span>' +
+        '</div>';
+    }).join('');
+}
+
+function toggleTipoFiltro(tipo) {
+  if (tiposFiltroActivos.has(tipo)) {
+    tiposFiltroActivos.delete(tipo);
+  } else {
+    tiposFiltroActivos.add(tipo);
+  }
+  aplicarFiltroMapa();
+  const tiposPresentes = [...new Set(novedadesMapaData.map(n => n.Tipo?.Value || n.Tipo || 'Sin tipo'))].sort();
+  renderLeyendaMapa(tiposPresentes);
 }
 
 async function generarDashboard() {
@@ -636,15 +699,14 @@ async function generarDashboard() {
     html += '</div>';
 
     // Mapa full width
+    tiposFiltroActivos = new Set(); // reset al generar nuevo dashboard
     html += '<div class="dash-card dash-card-full">' +
       '<h3>📍 Mapa de novedades <span style="font-weight:400;color:#94a3b8">(' + novedadesConGPS + ' con ubicación GPS)</span></h3>' +
-      '<div id="mapaNovedades"></div>' +
-      '<div class="mapa-leyenda">' +
-      '<div class="mapa-leyenda-item"><div class="mapa-dot" style="background:#1a3a6b"></div> BALP</div>' +
-      '<div class="mapa-leyenda-item"><div class="mapa-dot" style="background:#dc2626"></div> SVIA</div>' +
-      '<div class="mapa-leyenda-item"><div class="mapa-dot" style="background:#0f766e"></div> Ruta 6</div>' +
-      '<div class="mapa-leyenda-item"><div class="mapa-dot" style="background:#64748b"></div> Sin concesión</div>' +
-      '</div></div>';
+      '<div style="display:flex;gap:12px">' +
+        '<div id="mapaNovedades" style="flex:1;min-width:0"></div>' +
+        '<div id="mapaLeyenda" style="width:160px;flex-shrink:0;overflow-y:auto;max-height:380px;padding-right:2px"></div>' +
+      '</div>' +
+      '</div>';
 
     html += '</div>';
     cont.innerHTML = html;
