@@ -5,11 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Seguridad Patrimonial — AUBASA</title>
 <script src="https://cdn.jsdelivr.net/npm/@azure/msal-browser@3.28.0/lib/msal-browser.min.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: 'Segoe UI', Arial, sans-serif; background: #f0f2f5; color: #1a1a2e; }
-
-/* LOGIN */
 #loginScreen { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #08235a 0%, #1a3a6b 60%, #0f5499 100%); }
 .login-card { background: rgba(255,255,255,0.10); border: 1px solid rgba(255,255,255,0.22); border-radius: 20px; padding: 40px 36px; width: 100%; max-width: 400px; box-shadow: 0 8px 32px rgba(0,0,0,0.3); text-align: center; }
 .login-logo { font-size: 48px; margin-bottom: 8px; }
@@ -21,8 +21,6 @@ body { font-family: 'Segoe UI', Arial, sans-serif; background: #f0f2f5; color: #
 .ms-logo { display: flex; flex-direction: column; gap: 2px; } .ms-row { display: flex; gap: 2px; } .ms-sq { width: 10px; height: 10px; border-radius: 1px; }
 .login-error { background: rgba(220,38,38,0.2); border: 1px solid rgba(220,38,38,0.5); color: #fca5a5; border-radius: 8px; padding: 10px 14px; font-size: 13px; margin-top: 16px; display: none; }
 .login-hint { font-size: 12px; color: rgba(255,255,255,0.5); margin-top: 16px; }
-
-/* APP */
 #appScreen { display: none; min-height: 100vh; }
 .header { background: linear-gradient(90deg, #08235a, #1a3a6b); color: white; padding: 0 32px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 2px 8px rgba(0,0,0,0.15); height: 56px; }
 .header h1 { font-size: 17px; font-weight: 700; }
@@ -30,18 +28,12 @@ body { font-family: 'Segoe UI', Arial, sans-serif; background: #f0f2f5; color: #
 .user-info { font-size: 13px; opacity: 0.85; }
 .btn-logout { background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.25); color: white; padding: 6px 14px; border-radius: 6px; cursor: pointer; font-size: 13px; }
 .btn-logout:hover { background: rgba(255,255,255,0.22); }
-
-/* NAV TABS */
 .nav-tabs { background: white; border-bottom: 2px solid #e2e8f0; display: flex; padding: 0 32px; }
 .nav-tab { padding: 14px 20px; font-size: 13px; font-weight: 600; color: #64748b; cursor: pointer; border-bottom: 3px solid transparent; margin-bottom: -2px; transition: all 0.2s; }
 .nav-tab:hover { color: #1a3a6b; }
 .nav-tab.active { color: #1a3a6b; border-bottom-color: #1a3a6b; }
-
-/* PANELS */
 .panel { display: none; }
 .panel.active { display: block; }
-
-/* FILTROS */
 .filtros { background: white; padding: 16px 32px; border-bottom: 2px solid #e2e8f0; display: flex; gap: 16px; align-items: flex-end; flex-wrap: wrap; box-shadow: 0 1px 4px rgba(0,0,0,0.04); }
 .filtros label { font-size: 11px; color: #64748b; font-weight: 700; display: block; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
 .filtros select, .filtros input[type=date] { border: 1.5px solid #cbd5e1; border-radius: 6px; padding: 7px 11px; font-size: 13px; color: #1e293b; background: white; outline: none; }
@@ -53,20 +45,15 @@ body { font-family: 'Segoe UI', Arial, sans-serif; background: #f0f2f5; color: #
 .btn-danger { background: #dc2626; color: white; }
 .btn-secondary { background: #e2e8f0; color: #374151; }
 .btn-print { background: #0f766e; color: white; display: none; }
-
-/* CONTENIDO */
 .contenido { max-width: 1000px; margin: 24px auto; padding: 0 24px 60px; }
-
-/* CARDS */
 .resumen-cards { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-bottom: 24px; }
 .card { background: white; border-radius: 10px; padding: 14px 16px; border-left: 4px solid; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
 .card.total { border-color: #1a3a6b; } .card.abierto { border-color: #3b82f6; } .card.en-curso { border-color: #f59e0b; } .card.cerrada { border-color: #22c55e; } .card.resuelta { border-color: #7c3aed; }
 .card-num { font-size: 30px; font-weight: 700; color: #1e293b; } .card-label { font-size: 11px; color: #64748b; margin-top: 2px; font-weight: 600; }
-
-/* DASHBOARD */
 .dash-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
 .dash-card { background: white; border-radius: 10px; padding: 18px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
 .dash-card h3 { font-size: 13px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 14px; }
+.dash-card-full { grid-column: 1 / -1; }
 .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 24px; }
 .kpi-card { background: white; border-radius: 10px; padding: 16px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); text-align: center; }
 .kpi-icon { font-size: 24px; margin-bottom: 6px; }
@@ -81,7 +68,11 @@ body { font-family: 'Segoe UI', Arial, sans-serif; background: #f0f2f5; color: #
 .estado-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
 .estado-pill-label { font-size: 13px; flex: 1; }
 .estado-pill-val { font-size: 14px; font-weight: 700; }
-
+/* MAPA */
+#mapaNovedades { height: 380px; border-radius: 8px; overflow: hidden; }
+.mapa-leyenda { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 10px; font-size: 12px; color: #374151; }
+.mapa-leyenda-item { display: flex; align-items: center; gap: 6px; }
+.mapa-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
 /* REPORTE */
 .tarea-bloque { background: white; border-radius: 10px; margin-bottom: 16px; overflow: hidden; border: 1px solid #e2e8f0; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
 .tarea-header { padding: 14px 18px; display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; border-bottom: 1px solid #f1f5f9; background: #fafbff; }
@@ -123,7 +114,6 @@ body { font-family: 'Segoe UI', Arial, sans-serif; background: #f0f2f5; color: #
 .control-tabla tr:nth-child(even) td { background: #f8fafc; }
 .registro-lugar { background: #f0f7ff; border-radius: 6px; padding: 8px 12px; margin-bottom: 8px; border-left: 3px solid #3b82f6; }
 .registro-lugar-titulo { font-size: 12px; font-weight: 700; color: #1e40af; margin-bottom: 4px; }
-
 /* USUARIOS */
 .usuarios-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
 .usuarios-header h2 { font-size: 18px; font-weight: 700; color: #1e293b; }
@@ -144,7 +134,6 @@ body { font-family: 'Segoe UI', Arial, sans-serif; background: #f0f2f5; color: #
 .badge-inactivo { background: #fee2e2; color: #dc2626; }
 .btn-icon { background: none; border: none; cursor: pointer; font-size: 16px; padding: 4px 6px; border-radius: 4px; }
 .btn-icon:hover { background: #f1f5f9; }
-
 /* MODAL */
 .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 1000; }
 .modal-overlay.open { display: flex; }
@@ -156,7 +145,6 @@ body { font-family: 'Segoe UI', Arial, sans-serif; background: #f0f2f5; color: #
 .form-group input:focus, .form-group select:focus { border-color: #1a3a6b; }
 .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
-
 /* UTILS */
 .loading { text-align: center; padding: 60px; color: #64748b; }
 .loading .spinner { width: 36px; height: 36px; border: 3px solid #e2e8f0; border-top-color: #1a3a6b; border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 12px; }
@@ -168,7 +156,6 @@ body { font-family: 'Segoe UI', Arial, sans-serif; background: #f0f2f5; color: #
 .toast.success { background: #0f766e; }
 .toast.error { background: #dc2626; }
 .reporte-titulo { font-size: 18px; font-weight: 700; color: #1a3a6b; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 2px solid #1a3a6b; display: none; }
-
 @media print {
   body { background: white; }
   #loginScreen, .nav-tabs, .filtros, .btn-print, .btn-logout { display: none !important; }
@@ -227,6 +214,12 @@ body { font-family: 'Segoe UI', Arial, sans-serif; background: #f0f2f5; color: #
       <div><label>Hasta</label><input type="date" id="dashHasta"></div>
       <div><label>Turno</label>
         <select id="dashTurno"><option value="Todos">Todos</option><option value="Mañana">Mañana</option><option value="Tarde">Tarde</option><option value="Noche">Noche</option></select>
+      </div>
+      <div><label>Concesión</label>
+        <select id="dashConcesion"><option value="Todas">Todas</option><option value="BALP">BALP</option><option value="SVIA">SVIA</option><option value="Ruta 6">Ruta 6</option></select>
+      </div>
+      <div><label>Tipo novedad</label>
+        <select id="dashTipoNovedad"><option value="Todos">Todos</option></select>
       </div>
       <button class="btn btn-primary" onclick="generarDashboard()">🔍 Actualizar</button>
     </div>
@@ -336,7 +329,6 @@ body { font-family: 'Segoe UI', Arial, sans-serif; background: #f0f2f5; color: #
 <div class="toast" id="toast"></div>
 
 <script>
-// ── URLs ────────────────────────────────────────────────────────────────────
 var GET_EMPLEADOS_URL  = 'https://default9444ead097714ed8a608802faff70d.4f.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/aee7e5b3180f4e7bbcf754ef53650dac/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=hoN1MoVqFOvcTzzRMvwK1yFnjrF8zl08qHvwszdLYRQ';
 var POST_EMPLEADO_URL  = 'https://default9444ead097714ed8a608802faff70d.4f.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/71178a2c84bc48fb946532ca4d1adcb3/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=x3u9oFIj5uwsAJ7YKe8I0YUFoUntpYiPrsySEckIt7k';
 var PUT_EMPLEADO_URL   = 'https://default9444ead097714ed8a608802faff70d.4f.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/e50de6114192401ea6a14ffd698322dd/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=u9O4plQ1EC15XTWh_Z5Ggn2j9AWLjOnjYiQtJSuMC5Q';
@@ -346,11 +338,11 @@ var FLOW_REPORTE_URL   = 'https://default9444ead097714ed8a608802faff70d.4f.envir
 var GET_CHECKLIST_URL  = 'https://default9444ead097714ed8a608802faff70d.4f.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/bf78f54bef08499eb5dc49bff2dc10eb/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=PhE5cBP9ZnY5ai0x2jgOqMrYYRerHjzIluTJQo4F4s4';
 var GET_VIGILANCIA_URL = 'https://default9444ead097714ed8a608802faff70d.4f.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/fb668c40a0d94daca6a8dae8ba5b809d/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=s3Jn0dtGjeq2p_aRQkgjary2HJxkN8I1W_qrsj2fhWk';
 
-// ── Auth ────────────────────────────────────────────────────────────────────
 var usuarioActual = null;
 var rolActual = null;
 var empleadosCache = [];
 var msalInstance = null;
+var hoy = new Date().toISOString().split('T')[0];
 
 const msalConfig = {
   auth: { clientId: '006c6fd8-c5f2-4b90-b047-d0b57f0bafcb', authority: 'https://login.microsoftonline.com/9444ead0-9771-4ed8-a608-802faff70d4f', redirectUri: window.location.href.split('?')[0] },
@@ -406,7 +398,6 @@ function mostrarApp(nombre) {
   document.getElementById('userInfo').textContent = '👤 ' + nombre;
   document.getElementById('loginScreen').style.display = 'none';
   document.getElementById('appScreen').style.display = 'block';
-  // Solo jefatura ve dashboard y usuarios
   if (rolActual === 'jefatura') {
     document.getElementById('tabUsuarios').style.display = 'block';
     document.getElementById('tabDashboard').style.display = 'block';
@@ -416,7 +407,6 @@ function mostrarApp(nombre) {
   } else {
     document.getElementById('tabDashboard').style.display = 'none';
   }
-  // Tab inicial según rol
   if (rolActual === 'jefatura') {
     document.getElementById('panel-dashboard').classList.add('active');
     document.getElementById('tabDashboard').classList.add('active');
@@ -434,7 +424,6 @@ function mostrarApp(nombre) {
 function mostrarError(msg) { const el = document.getElementById('loginError'); el.textContent = msg; el.style.display = msg ? 'block' : 'none'; }
 function logout() { usuarioActual = null; if (msalInstance) { try { msalInstance.logoutPopup(); } catch(e) {} } document.getElementById('loginScreen').style.display = 'flex'; document.getElementById('appScreen').style.display = 'none'; }
 
-// ── TABS ────────────────────────────────────────────────────────────────────
 function showTab(tab) {
   document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
@@ -443,14 +432,12 @@ function showTab(tab) {
   document.getElementById('btnImprimir').style.display = tab === 'reporte' ? 'inline-block' : 'none';
 }
 
-// ── TOAST ────────────────────────────────────────────────────────────────────
 function showToast(msg, type = '') {
   const t = document.getElementById('toast');
   t.textContent = msg; t.className = 'toast show ' + type;
   setTimeout(() => t.className = 'toast', 3000);
 }
 
-// ── UTILS ────────────────────────────────────────────────────────────────────
 function val(c) { if (!c) return '—'; if (typeof c === 'object' && c.Value) return c.Value; return c; }
 function formatFecha(f) { if (!f) return '—'; try { const p = f.split('T')[0]; if (p && p.length===10) { const [y,m,d]=p.split('-'); return d+'/'+m+'/'+y; } return f; } catch(e) { return f; } }
 function formatHora(h) { if (!h) return '—'; return h.length > 5 ? h.substring(0,5) : h; }
@@ -462,10 +449,72 @@ function minutosEntre(fIni, hIni, fFin, hFin) {
 }
 
 // ── DASHBOARD ────────────────────────────────────────────────────────────────
+var dashMap = null;
+var dashMarkers = [];
+
+function initDashMap() {
+  if (dashMap) { dashMap.remove(); dashMap = null; }
+  dashMap = L.map('mapaNovedades').setView([-34.6, -58.7], 9);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap', maxZoom: 18
+  }).addTo(dashMap);
+}
+
+function getConcesionColor(c) {
+  if (!c) return '#64748b';
+  const v = (c.Value || c || '').toString().toUpperCase();
+  if (v.includes('BALP')) return '#1a3a6b';
+  if (v.includes('SVIA')) return '#dc2626';
+  if (v.includes('RUTA') || v.includes('6')) return '#0f766e';
+  return '#64748b';
+}
+
+function renderMapa(novedades) {
+  if (!dashMap) return;
+  dashMarkers.forEach(m => dashMap.removeLayer(m));
+  dashMarkers = [];
+  const conGPS = novedades.filter(n => n.GPS_Latitud && n.GPS_Longitud);
+  if (!conGPS.length) return;
+  const bounds = [];
+  conGPS.forEach(n => {
+    const lat = parseFloat(n.GPS_Latitud);
+    const lng = parseFloat(n.GPS_Longitud);
+    if (isNaN(lat) || isNaN(lng)) return;
+    const con = n.Concesion?.Value || n.Concesion || '';
+    const color = getConcesionColor(con);
+    const tipo = n.Tipo?.Value || n.Tipo || 'Novedad';
+    const fecha = n.Fecha ? n.Fecha.split('T')[0].split('-').reverse().join('/') : '';
+    const hora = n.Hora ? n.Hora.substring(0,5) : '';
+    // Label visible sobre el pin
+    const tipoCorto = tipo.length > 18 ? tipo.substring(0,16) + '…' : tipo;
+    const markerHtml =
+      '<div style="position:relative;display:inline-block">' +
+        '<svg xmlns="http://www.w3.org/2000/svg" width="28" height="36" viewBox="0 0 28 36">' +
+          '<path d="M14 0C6.3 0 0 6.3 0 14c0 9.9 14 22 14 22S28 23.9 28 14C28 6.3 21.7 0 14 0z" fill="' + color + '" stroke="white" stroke-width="2"/>' +
+          '<circle cx="14" cy="14" r="6" fill="white"/>' +
+        '</svg>' +
+        '<div style="position:absolute;bottom:38px;left:50%;transform:translateX(-50%);background:' + color + ';color:white;font-size:9px;font-weight:700;white-space:nowrap;padding:2px 5px;border-radius:4px;pointer-events:none;box-shadow:0 1px 3px rgba(0,0,0,0.3)">' +
+          tipoCorto +
+        '</div>' +
+      '</div>';
+    const icon = L.divIcon({ html: markerHtml, iconSize:[28,74], iconAnchor:[14,72], popupAnchor:[0,-72], className:'' });
+    const detalle = n.Detalle ? n.Detalle.substring(0,100) + (n.Detalle.length > 100 ? '...' : '') : '';
+    const popup = '<div style="font-size:12px;min-width:160px"><strong style="color:' + color + '">' + tipo + '</strong><br>' +
+      fecha + (hora ? ' · ' + hora + ' hs' : '') + '<br>' +
+      (con ? '<span style="color:#64748b">' + con + '</span><br>' : '') +
+      (detalle ? '<div style="margin-top:4px;color:#374151">' + detalle + '</div>' : '') + '</div>';
+    const marker = L.marker([lat, lng], {icon}).addTo(dashMap).bindPopup(popup);
+    dashMarkers.push(marker);
+    bounds.push([lat, lng]);
+  });
+  if (bounds.length > 0) dashMap.fitBounds(bounds, {padding:[30,30], maxZoom:13});
+}
+
 async function generarDashboard() {
   const desde = document.getElementById('dashDesde').value;
   const hasta = document.getElementById('dashHasta').value;
   const turno = document.getElementById('dashTurno').value;
+  const concesionFiltro = document.getElementById('dashConcesion').value;
   const cont = document.getElementById('dashContenido');
   if (!desde || !hasta) { alert('Seleccioná un rango de fechas'); return; }
   cont.innerHTML = '<div class="loading"><div class="spinner"></div><div>Cargando dashboard...</div></div>';
@@ -474,8 +523,32 @@ async function generarDashboard() {
     if (!resp.ok) throw new Error('Error ' + resp.status);
     const data = await resp.json();
     let tareas = Array.isArray(data.tareas) ? data.tareas : [];
-    const novedades = Array.isArray(data.eventualidades) ? data.eventualidades : (Array.isArray(data.novedades) ? data.novedades : []);
+    let novedades = Array.isArray(data.eventualidades) ? data.eventualidades : (Array.isArray(data.novedades) ? data.novedades : []);
+
     if (turno !== 'Todos') tareas = tareas.filter(t => (t.tarea?.Turno?.Value || t.tarea?.Turno || t.Turno?.Value || t.Turno || '') === turno);
+
+    if (concesionFiltro !== 'Todas') {
+      tareas = tareas.filter(item => {
+        const t = item.tarea || item;
+        const raw = t['Concesi_x00f3_n'] || t.Concesion;
+        const zonas = Array.isArray(raw) ? raw.map(c=>c?.Value||c).filter(Boolean) : [raw?.Value||(typeof raw==='string'?raw:null)].filter(Boolean);
+        return zonas.some(z => z === concesionFiltro);
+      });
+      novedades = novedades.filter(n => {
+        const c = n.Concesion?.Value || n.Concesion || '';
+        return c === concesionFiltro;
+      });
+    }
+
+    // Poblar select de tipo novedad con los tipos presentes
+    const tiposFiltro = document.getElementById('dashTipoNovedad');
+    const tipoSeleccionado = tiposFiltro.value;
+    const tiposUnicos = [...new Set(novedades.map(n => n.Tipo?.Value || n.Tipo || '').filter(Boolean))].sort();
+    tiposFiltro.innerHTML = '<option value="Todos">Todos</option>' + tiposUnicos.map(t => '<option value="' + t + '" ' + (t === tipoSeleccionado ? 'selected' : '') + '>' + t + '</option>').join('');
+    const tipoNovFiltro = tiposFiltro.value;
+    if (tipoNovFiltro !== 'Todos') {
+      novedades = novedades.filter(n => (n.Tipo?.Value || n.Tipo || '') === tipoNovFiltro);
+    }
 
     const porEstado = {};
     tareas.forEach(item => {
@@ -484,15 +557,13 @@ async function generarDashboard() {
       porEstado[e] = (porEstado[e] || 0) + 1;
     });
 
-    // Tiempo promedio
     const tiempos = tareas.map(item => {
       const t = item.tarea || item;
       return minutosEntre(formatFecha(t.Fechadeiniciodetarea), formatHora(t.Horadeiniciodetarea), formatFecha(t.Fechadefindetarea), formatHora(t.Horadefindetareas));
     }).filter(m => m !== null && m > 0);
     const promedioMin = tiempos.length ? Math.round(tiempos.reduce((a,b)=>a+b,0)/tiempos.length) : null;
-    const promedioStr = promedioMin ? `${Math.floor(promedioMin/60)}h ${promedioMin%60}min` : '—';
+    const promedioStr = promedioMin ? Math.floor(promedioMin/60) + 'h ' + (promedioMin%60) + 'min' : '—';
 
-    // Top personal novedades
     const topPersonal = Object.entries(
       novedades.reduce((acc, ev) => {
         const nombre = ev.CargadoPorNombre && ev.CargadoPorNombre.length < 40 ? ev.CargadoPorNombre : (ev.CargadoPorEmail || ev.Chofer1 || 'Sin nombre');
@@ -500,7 +571,6 @@ async function generarDashboard() {
       }, {})
     ).sort((a,b)=>b[1]-a[1]).slice(0,5);
 
-    // Top tipos de tarea
     const topTipos = Object.entries(
       tareas.reduce((acc, item) => {
         const t = item.tarea || item;
@@ -509,7 +579,6 @@ async function generarDashboard() {
       }, {})
     ).sort((a,b)=>b[1]-a[1]).slice(0,5);
 
-    // Top concesion
     const topConcesion = Object.entries(
       tareas.reduce((acc, item) => {
         const t = item.tarea || item;
@@ -522,58 +591,71 @@ async function generarDashboard() {
 
     const maxTop = topPersonal[0]?.[1] || 1;
     const maxTipo = topTipos[0]?.[1] || 1;
-
     const estadoColors = { 'Abierto': '#3b82f6', 'En curso': '#f59e0b', 'Cerrada': '#22c55e', 'Resuelta': '#7c3aed' };
+    const novedadesConGPS = novedades.filter(n => n.GPS_Latitud && n.GPS_Longitud).length;
 
-    let html = `
-    <div class="kpi-grid">
-      <div class="kpi-card"><div class="kpi-icon">📋</div><div class="kpi-val">${tareas.length}</div><div class="kpi-label">Tareas totales</div></div>
-      <div class="kpi-card"><div class="kpi-icon">🚨</div><div class="kpi-val">${novedades.length}</div><div class="kpi-label">Novedades</div></div>
-      <div class="kpi-card"><div class="kpi-icon">✅</div><div class="kpi-val">${porEstado['Cerrada']||0}</div><div class="kpi-label">Cerradas</div></div>
-      <div class="kpi-card"><div class="kpi-icon">⏱</div><div class="kpi-val" style="font-size:20px">${promedioStr}</div><div class="kpi-label">Tiempo promedio cierre</div></div>
-    </div>
-    <div class="dash-grid">
-      <div class="dash-card">
-        <h3>📊 Tareas por estado</h3>
-        ${['Abierto','En curso','Cerrada','Resuelta'].map(e => `
-          <div class="estado-pill" style="background:${estadoColors[e]}15">
-            <div class="estado-dot" style="background:${estadoColors[e]}"></div>
-            <span class="estado-pill-label">${e}</span>
-            <span class="estado-pill-val">${porEstado[e]||0}</span>
-          </div>`).join('')}
-      </div>
-      <div class="dash-card">
-        <h3>🗺 Por concesión</h3>
-        ${topConcesion.map(([z,n]) => `
-          <div class="bar-row">
-            <span class="bar-label">${z}</span>
-            <div class="bar-track"><div class="bar-fill" style="width:${Math.round(n/(topConcesion[0]?.[1]||1)*100)}%"></div></div>
-            <span class="bar-val">${n}</span>
-          </div>`).join('') || '<div class="sin-datos">Sin datos</div>'}
-      </div>
-      <div class="dash-card">
-        <h3>👤 Top personal — Novedades</h3>
-        ${topPersonal.length ? topPersonal.map(([nombre,cant]) => `
-          <div class="bar-row">
-            <span class="bar-label">${nombre}</span>
-            <div class="bar-track"><div class="bar-fill" style="width:${Math.round(cant/maxTop*100)}%;background:#dc2626"></div></div>
-            <span class="bar-val">${cant}</span>
-          </div>`).join('') : '<div class="sin-datos">Sin novedades en el período</div>'}
-      </div>
-      <div class="dash-card">
-        <h3>📌 Tipos de tarea más frecuentes</h3>
-        ${topTipos.map(([tipo,cant]) => `
-          <div class="bar-row">
-            <span class="bar-label">${tipo}</span>
-            <div class="bar-track"><div class="bar-fill" style="width:${Math.round(cant/maxTipo*100)}%;background:#0f766e"></div></div>
-            <span class="bar-val">${cant}</span>
-          </div>`).join('') || '<div class="sin-datos">Sin datos</div>'}
-      </div>
-    </div>`;
+    let html = '<div class="kpi-grid">' +
+      '<div class="kpi-card"><div class="kpi-icon">📋</div><div class="kpi-val">' + tareas.length + '</div><div class="kpi-label">Tareas totales</div></div>' +
+      '<div class="kpi-card"><div class="kpi-icon">🚨</div><div class="kpi-val">' + novedades.length + '</div><div class="kpi-label">Novedades</div></div>' +
+      '<div class="kpi-card"><div class="kpi-icon">✅</div><div class="kpi-val">' + (porEstado['Cerrada']||0) + '</div><div class="kpi-label">Cerradas</div></div>' +
+      '<div class="kpi-card"><div class="kpi-icon">⏱</div><div class="kpi-val" style="font-size:20px">' + promedioStr + '</div><div class="kpi-label">Tiempo promedio cierre</div></div>' +
+      '</div><div class="dash-grid">';
 
+    // Tareas por estado
+    html += '<div class="dash-card"><h3>📊 Tareas por estado</h3>';
+    ['Abierto','En curso','Cerrada','Resuelta'].forEach(e => {
+      html += '<div class="estado-pill" style="background:' + estadoColors[e] + '15"><div class="estado-dot" style="background:' + estadoColors[e] + '"></div><span class="estado-pill-label">' + e + '</span><span class="estado-pill-val">' + (porEstado[e]||0) + '</span></div>';
+    });
+    html += '</div>';
+
+    // Por concesion
+    html += '<div class="dash-card"><h3>🗺 Por concesión</h3>';
+    if (topConcesion.length) {
+      topConcesion.forEach(([z,n]) => {
+        html += '<div class="bar-row"><span class="bar-label">' + z + '</span><div class="bar-track"><div class="bar-fill" style="width:' + Math.round(n/(topConcesion[0]?.[1]||1)*100) + '%"></div></div><span class="bar-val">' + n + '</span></div>';
+      });
+    } else html += '<div class="sin-datos">Sin datos</div>';
+    html += '</div>';
+
+    // Top personal
+    html += '<div class="dash-card"><h3>👤 Top personal — Novedades</h3>';
+    if (topPersonal.length) {
+      topPersonal.forEach(([nombre,cant]) => {
+        html += '<div class="bar-row"><span class="bar-label">' + nombre + '</span><div class="bar-track"><div class="bar-fill" style="width:' + Math.round(cant/maxTop*100) + '%;background:#dc2626"></div></div><span class="bar-val">' + cant + '</span></div>';
+      });
+    } else html += '<div class="sin-datos">Sin novedades en el período</div>';
+    html += '</div>';
+
+    // Tipos
+    html += '<div class="dash-card"><h3>📌 Tipos de tarea más frecuentes</h3>';
+    if (topTipos.length) {
+      topTipos.forEach(([tipo,cant]) => {
+        html += '<div class="bar-row"><span class="bar-label">' + tipo + '</span><div class="bar-track"><div class="bar-fill" style="width:' + Math.round(cant/maxTipo*100) + '%;background:#0f766e"></div></div><span class="bar-val">' + cant + '</span></div>';
+      });
+    } else html += '<div class="sin-datos">Sin datos</div>';
+    html += '</div>';
+
+    // Mapa full width
+    html += '<div class="dash-card dash-card-full">' +
+      '<h3>📍 Mapa de novedades <span style="font-weight:400;color:#94a3b8">(' + novedadesConGPS + ' con ubicación GPS)</span></h3>' +
+      '<div id="mapaNovedades"></div>' +
+      '<div class="mapa-leyenda">' +
+      '<div class="mapa-leyenda-item"><div class="mapa-dot" style="background:#1a3a6b"></div> BALP</div>' +
+      '<div class="mapa-leyenda-item"><div class="mapa-dot" style="background:#dc2626"></div> SVIA</div>' +
+      '<div class="mapa-leyenda-item"><div class="mapa-dot" style="background:#0f766e"></div> Ruta 6</div>' +
+      '<div class="mapa-leyenda-item"><div class="mapa-dot" style="background:#64748b"></div> Sin concesión</div>' +
+      '</div></div>';
+
+    html += '</div>';
     cont.innerHTML = html;
+
+    setTimeout(() => {
+      initDashMap();
+      renderMapa(novedades);
+    }, 100);
+
   } catch(e) {
-    cont.innerHTML = '<div class="empty"><div class="empty-icon">⚠️</div><div>Error al cargar: '+e.message+'</div></div>';
+    cont.innerHTML = '<div class="empty"><div class="empty-icon">⚠️</div><div>Error al cargar: ' + e.message + '</div></div>';
   }
 }
 
@@ -599,7 +681,7 @@ function renderChecklist(registros) {
     const color = esPre ? '#0f766e' : '#1a3a6b';
     const titulo = esPre ? '✅ Check Pre-Inicio' : '🔒 Check de Cierre';
     const checks = ['Frenos','Luces','Agua','Aceite'].map(k => { const v=vc(r[k]); if(!v) return ''; return '<span class="check-item '+(v==='Cumple'?'check-cumple':'check-nocumple')+'">'+k+': '+v+'</span>'; }).filter(Boolean).join('');
-    return `<div class="checklist-bloque" style="border-left-color:${color}"><div class="checklist-modo">${titulo}</div>${km!=null?'<div class="check-km" style="margin-bottom:6px">'+(esPre?'Km inicial':'Km final')+': '+km+' km</div>':''}${checks?'<div class="checklist-items">'+checks+'</div>':''}${r.Observacion?'<div style="font-size:11px;color:#64748b;margin-top:4px">Obs: '+r.Observacion+'</div>':''}${r.ObservacionFinal?'<div style="font-size:11px;color:#64748b;margin-top:4px">Obs. final: '+r.ObservacionFinal+'</div>':''}<div style="font-size:10px;color:#94a3b8;margin-top:4px">${r.FechaInicio||''} ${r.HoraInicio?r.HoraInicio+' hs':''}${r.CargadoPorNombre?' · '+r.CargadoPorNombre:''}</div></div>`;
+    return '<div class="checklist-bloque" style="border-left-color:'+color+'"><div class="checklist-modo">'+titulo+'</div>'+(km!=null?'<div class="check-km" style="margin-bottom:6px">'+(esPre?'Km inicial':'Km final')+': '+km+' km</div>':'')+(checks?'<div class="checklist-items">'+checks+'</div>':'')+(r.Observacion?'<div style="font-size:11px;color:#64748b;margin-top:4px">Obs: '+r.Observacion+'</div>':'')+(r.ObservacionFinal?'<div style="font-size:11px;color:#64748b;margin-top:4px">Obs. final: '+r.ObservacionFinal+'</div>':'')+'<div style="font-size:10px;color:#94a3b8;margin-top:4px">'+(r.FechaInicio||'')+' '+(r.HoraInicio?r.HoraInicio+' hs':'')+(r.CargadoPorNombre?' · '+r.CargadoPorNombre:'')+'</div></div>';
   }).join('');
 }
 
@@ -757,19 +839,7 @@ function renderTablaUsuarios(empleados) {
     const activo = e.field_6?.Value || e.field_6 || '—';
     const concesion = Array.isArray(e.field_4) ? e.field_4.map(c=>c?.Value||c).join(', ') : (e.field_4?.Value || e.field_4 || '—');
     const rolBadge = { jefatura:'badge-jefatura', supervisor:'badge-supervisor', admin:'badge-admin', chofer:'badge-chofer' }[rol] || '';
-    html += `<tr>
-      <td><strong>${e.Title||'—'}</strong></td>
-      <td>${e.email||'—'}</td>
-      <td>${e.field_1||'—'}</td>
-      <td>${e.field_2?.Value||e.field_2||'—'}</td>
-      <td><span class="badge-rol ${rolBadge}">${rol}</span></td>
-      <td>${concesion}</td>
-      <td><span class="badge-rol ${activo==='Si'?'badge-activo':'badge-inactivo'}">${activo==='Si'?'Activo':'Inactivo'}</span></td>
-      <td>
-        <button class="btn-icon" title="Editar" onclick="abrirModalEditar(${e.ID})">✏️</button>
-        <button class="btn-icon" title="${activo==='Si'?'Desactivar':'Activar'}" onclick="toggleActivo(${e.ID},'${activo}')">${activo==='Si'?'🔴':'🟢'}</button>
-      </td>
-    </tr>`;
+    html += '<tr><td><strong>'+(e.Title||'—')+'</strong></td><td>'+(e.email||'—')+'</td><td>'+(e.field_1||'—')+'</td><td>'+(e.field_2?.Value||e.field_2||'—')+'</td><td><span class="badge-rol '+rolBadge+'">'+rol+'</span></td><td>'+concesion+'</td><td><span class="badge-rol '+(activo==='Si'?'badge-activo':'badge-inactivo')+'">'+(activo==='Si'?'Activo':'Inactivo')+'</span></td><td><button class="btn-icon" title="Editar" onclick="abrirModalEditar('+e.ID+')">✏️</button><button class="btn-icon" title="'+(activo==='Si'?'Desactivar':'Activar')+'" onclick="toggleActivo('+e.ID+',\''+activo+'\')">'+(activo==='Si'?'🔴':'🟢')+'</button></td></tr>';
   });
   html += '</tbody></table>';
   document.getElementById('tablaUsuariosContenido').innerHTML = html;
@@ -815,21 +885,12 @@ async function guardarUsuario() {
   const rol = document.getElementById('uRol').value;
   const activo = document.getElementById('uActivo').value;
   const concesionOpts = Array.from(document.getElementById('uConcesion').selectedOptions).map(o=>o.value);
-
   if (!nombre || !email) { showToast('Nombre y email son obligatorios', 'error'); return; }
-
   const btn = document.getElementById('btnGuardarUsuario');
   btn.disabled = true; btn.textContent = 'Guardando...';
-
   try {
-    const payload = {
-      Nombre: nombre, Apellido: apellido, Email: email,
-      Legajo: legajo ? Number(legajo) : null,
-      Puesto: puesto, Rol: rol, Activo: activo,
-      Concesion: concesionOpts,
-    };
+    const payload = { Nombre: nombre, Apellido: apellido, Email: email, Legajo: legajo ? Number(legajo) : null, Puesto: puesto, Rol: rol, Activo: activo, Concesion: concesionOpts };
     if (empleadoEditando) payload.ID = empleadoEditando.ID;
-
     const url = empleadoEditando ? PUT_EMPLEADO_URL : POST_EMPLEADO_URL;
     const resp = await fetch(url, {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
     if (!resp.ok) throw new Error('Error ' + resp.status);
@@ -847,13 +908,8 @@ async function toggleActivo(id, estadoActual) {
   const nuevoEstado = estadoActual === 'Si' ? 'No' : 'Si';
   const accion = nuevoEstado === 'No' ? 'desactivar' : 'activar';
   if (!confirm('¿Querés '+accion+' este usuario?')) return;
-  const e = todosEmpleados.find(u => u.ID === id);
-  if (!e) return;
   try {
-    await fetch(PUT_ESTADO_EMPLEADO_URL, {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
-      id: id,
-      activo: nuevoEstado,
-    })});
+    await fetch(PUT_ESTADO_EMPLEADO_URL, {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({ id: id, activo: nuevoEstado })});
     showToast('Usuario '+(nuevoEstado==='Si'?'activado':'desactivado'), 'success');
     await cargarUsuarios();
   } catch(e) { showToast('Error: '+e.message, 'error'); }
