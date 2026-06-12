@@ -5,10 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Seguridad Patrimonial — AUBASA</title>
 <script src="https://cdn.jsdelivr.net/npm/@azure/msal-browser@3.28.0/lib/msal-browser.min.js"></script>
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: 'Segoe UI', Arial, sans-serif; background: #f0f2f5; color: #1a1a2e; }
@@ -462,12 +458,26 @@ function minutosEntre(fIni, hIni, fFin, hFin) {
 var dashMap = null;
 var dashMarkers = [];
 
-function initDashMap() {
-  if (dashMap) { dashMap.remove(); dashMap = null; }
-  dashMap = L.map('mapaNovedades').setView([-34.6, -58.7], 9);
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '© OpenStreetMap', maxZoom: 18
-  }).addTo(dashMap);
+function initDashMap(callback) {
+  if (window.L) { _crearMapa(); return; }
+  // Cargar Leaflet dinámicamente
+  var link = document.createElement('link');
+  link.rel = 'stylesheet';
+  link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
+  document.head.appendChild(link);
+  var script = document.createElement('script');
+  script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+  script.onload = function() { _crearMapa(); };
+  script.onerror = function() { console.error('No se pudo cargar Leaflet'); };
+  document.head.appendChild(script);
+  function _crearMapa() {
+    if (dashMap) { dashMap.remove(); dashMap = null; }
+    dashMap = L.map('mapaNovedades').setView([-34.6, -58.7], 9);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap', maxZoom: 18
+    }).addTo(dashMap);
+    if (callback) callback();
+  }
 }
 
 function getConcesionColor(c) {
@@ -730,8 +740,7 @@ async function generarDashboard() {
     cont.innerHTML = html;
 
     setTimeout(() => {
-      initDashMap();
-      renderMapa(novedades);
+      initDashMap(function() { renderMapa(novedades); });
     }, 100);
 
   } catch(e) {
