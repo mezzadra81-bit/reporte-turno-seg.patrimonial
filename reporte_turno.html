@@ -7,6 +7,8 @@
 <script src="https://cdn.jsdelivr.net/npm/@azure/msal-browser@3.28.0/lib/msal-browser.min.js"></script>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: 'Segoe UI', Arial, sans-serif; background: #f0f2f5; color: #1a1a2e; }
@@ -54,13 +56,6 @@ body { font-family: 'Segoe UI', Arial, sans-serif; background: #f0f2f5; color: #
 .dash-card { background: white; border-radius: 10px; padding: 18px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
 .dash-card h3 { font-size: 13px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 14px; }
 .dash-card-full { grid-column: 1 / -1; }
-/* Layout mapa central */
-.dash-layout-mapa { display: grid; grid-template-columns: 220px 1fr 220px; gap: 16px; margin-bottom: 24px; align-items: start; }
-.dash-col-lateral { display: flex; flex-direction: column; gap: 16px; }
-.dash-card-mapa { background: white; border-radius: 10px; padding: 18px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
-.dash-card-lateral { background: white; border-radius: 10px; padding: 16px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
-.dash-card-lateral h3 { font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; }
-.dash-card-mapa h3 { font-size: 13px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; }
 .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 24px; }
 .kpi-card { background: white; border-radius: 10px; padding: 16px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); text-align: center; }
 .kpi-icon { font-size: 24px; margin-bottom: 6px; }
@@ -161,6 +156,16 @@ body { font-family: 'Segoe UI', Arial, sans-serif; background: #f0f2f5; color: #
 .toast.success { background: #0f766e; }
 .toast.error { background: #dc2626; }
 .reporte-titulo { font-size: 18px; font-weight: 700; color: #1a3a6b; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 2px solid #1a3a6b; display: none; }
+/* Layout mapa central */
+.dash-layout-mapa { display: grid; grid-template-columns: 220px 1fr 220px; gap: 16px; margin-bottom: 24px; align-items: start; }
+.dash-col-lateral { display: flex; flex-direction: column; gap: 16px; }
+.dash-card-mapa { background: white; border-radius: 10px; padding: 18px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+.dash-card-lateral { background: white; border-radius: 10px; padding: 16px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+.dash-card-lateral h3 { font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; }
+.dash-card-mapa h3 { font-size: 13px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; }
+/* MAPA */
+#mapaNovedades { height: 380px; border-radius: 8px; overflow: hidden; }
+#mapaLeyenda { scrollbar-width: thin; scrollbar-color: #cbd5e1 transparent; }
 @media print {
   body { background: white; }
   #loginScreen, .nav-tabs, .filtros, .btn-print, .btn-logout { display: none !important; }
@@ -350,14 +355,10 @@ var msalInstance = null;
 var hoy = new Date().toISOString().split('T')[0];
 
 const msalConfig = {
-  auth: {
-    clientId: '006c6fd8-c5f2-4b90-b047-d0b57f0bafcb',
-    authority: 'https://login.microsoftonline.com/9444ead0-9771-4ed8-a608-802faff70d4f',
-    redirectUri: window.location.origin + window.location.pathname
-  },
+  auth: { clientId: '006c6fd8-c5f2-4b90-b047-d0b57f0bafcb', authority: 'https://login.microsoftonline.com/9444ead0-9771-4ed8-a608-802faff70d4f', redirectUri: window.location.href.split('?')[0] },
   cache: { cacheLocation: 'sessionStorage' }
 };
-try { msalInstance = new msal.PublicClientApplication(msalConfig); } catch(e) { console.error('MSAL init error:', e); }
+try { msalInstance = new msal.PublicClientApplication(msalConfig); } catch(e) {}
 
 function loginAdmin() {
   var user = prompt('Usuario:'); if (!user) return;
@@ -374,35 +375,17 @@ window.addEventListener('load', async () => {
   if (!msalInstance) return;
   try {
     await msalInstance.initialize();
-    // Handle redirect response first (in case of redirect flow fallback)
-    const redirectResult = await msalInstance.handleRedirectPromise().catch(() => null);
-    if (redirectResult && redirectResult.account) {
-      await verificarYMostrarApp(redirectResult.account);
-      return;
-    }
     const accounts = msalInstance.getAllAccounts();
     if (accounts.length > 0) await verificarYMostrarApp(accounts[0]);
-  } catch(e) { console.error('MSAL load error:', e); }
+  } catch(e) {}
 });
 
 async function loginMicrosoft() {
   const btn = document.getElementById('btnLogin'); btn.disabled = true; mostrarError('');
-  if (!msalInstance) { mostrarError('Error de configuración MSAL. Recargá la página.'); btn.disabled = false; return; }
   try {
-    await msalInstance.initialize();
     const response = await msalInstance.loginPopup({ scopes: ['User.Read'], prompt: 'select_account' });
     await verificarYMostrarApp(response.account);
-  } catch(e) {
-    btn.disabled = false;
-    console.error('loginPopup error:', e);
-    if (e.errorCode === 'popup_window_error' || e.errorCode === 'empty_window_error') {
-      mostrarError('El popup fue bloqueado. Habilitá popups para este sitio e intentá de nuevo.');
-    } else if (e.errorCode === 'user_cancelled') {
-      mostrarError('Inicio de sesión cancelado.');
-    } else {
-      mostrarError('Error al iniciar sesión: ' + (e.errorMessage || e.message || e.errorCode || 'desconocido'));
-    }
-  }
+  } catch(e) { btn.disabled = false; mostrarError('Error al iniciar sesión.'); }
 }
 
 async function verificarYMostrarApp(account) {
