@@ -54,6 +54,13 @@ body { font-family: 'Segoe UI', Arial, sans-serif; background: #f0f2f5; color: #
 .dash-card { background: white; border-radius: 10px; padding: 18px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
 .dash-card h3 { font-size: 13px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 14px; }
 .dash-card-full { grid-column: 1 / -1; }
+/* Layout mapa central */
+.dash-layout-mapa { display: grid; grid-template-columns: 220px 1fr 220px; gap: 16px; margin-bottom: 24px; align-items: start; }
+.dash-col-lateral { display: flex; flex-direction: column; gap: 16px; }
+.dash-card-mapa { background: white; border-radius: 10px; padding: 18px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+.dash-card-lateral { background: white; border-radius: 10px; padding: 16px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+.dash-card-lateral h3 { font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; }
+.dash-card-mapa h3 { font-size: 13px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; }
 .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 24px; }
 .kpi-card { background: white; border-radius: 10px; padding: 16px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); text-align: center; }
 .kpi-icon { font-size: 24px; margin-bottom: 6px; }
@@ -547,19 +554,19 @@ function aplicarFiltroMapa() {
 function renderLeyendaMapa(tipos) {
   const leyenda = document.getElementById('mapaLeyenda');
   if (!leyenda) return;
-  leyenda.innerHTML = '<div style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px">Tipo de novedad</div>' +
-    tipos.map(t => {
-      const color = getTipoColor(t);
-      const activo = tiposFiltroActivos.size === 0 || tiposFiltroActivos.has(t);
-      return '<div onclick="toggleTipoFiltro('' + t.replace(/'/g, "\'") + '')" ' +
-        'style="display:flex;align-items:center;gap:8px;padding:5px 8px;border-radius:6px;cursor:pointer;margin-bottom:3px;' +
-        'background:' + (activo ? color + '18' : '#f1f5f9') + ';' +
-        'border:1.5px solid ' + (activo ? color + '60' : '#e2e8f0') + ';' +
-        'opacity:' + (activo ? '1' : '0.45') + ';transition:all 0.15s">' +
-        '<div style="width:12px;height:12px;border-radius:50%;background:' + color + ';flex-shrink:0;border:2px solid white;box-shadow:0 1px 3px rgba(0,0,0,0.2)"></div>' +
-        '<span style="font-size:11px;font-weight:600;color:#374151;line-height:1.2">' + t + '</span>' +
-        '</div>';
-    }).join('');
+  leyenda.innerHTML = tipos.map(t => {
+    const color = getTipoColor(t);
+    const activo = tiposFiltroActivos.size === 0 || tiposFiltroActivos.has(t);
+    return '<div onclick="toggleTipoFiltro('' + t.replace(/'/g, "\'") + '')" ' +
+      'title="' + t + '" ' +
+      'style="display:inline-flex;align-items:center;gap:5px;padding:3px 8px;border-radius:20px;cursor:pointer;' +
+      'background:' + (activo ? color + '18' : '#f1f5f9') + ';' +
+      'border:1.5px solid ' + (activo ? color + '55' : '#e2e8f0') + ';' +
+      'opacity:' + (activo ? '1' : '0.4') + ';transition:all 0.15s">' +
+      '<div style="width:9px;height:9px;border-radius:50%;background:' + color + ';flex-shrink:0"></div>' +
+      '<span style="font-size:10px;font-weight:600;color:#374151;white-space:nowrap">' + t + '</span>' +
+      '</div>';
+  }).join('');
 }
 
 function toggleTipoFiltro(tipo) {
@@ -657,58 +664,64 @@ async function generarDashboard() {
     const estadoColors = { 'Abierto': '#3b82f6', 'En curso': '#f59e0b', 'Cerrada': '#22c55e', 'Resuelta': '#7c3aed' };
     const novedadesConGPS = novedades.filter(n => n.GPS_Latitud && n.GPS_Longitud).length;
 
+    // KPIs
     let html = '<div class="kpi-grid">' +
       '<div class="kpi-card"><div class="kpi-icon">📋</div><div class="kpi-val">' + tareas.length + '</div><div class="kpi-label">Tareas totales</div></div>' +
       '<div class="kpi-card"><div class="kpi-icon">🚨</div><div class="kpi-val">' + novedades.length + '</div><div class="kpi-label">Novedades</div></div>' +
       '<div class="kpi-card"><div class="kpi-icon">✅</div><div class="kpi-val">' + (porEstado['Cerrada']||0) + '</div><div class="kpi-label">Cerradas</div></div>' +
       '<div class="kpi-card"><div class="kpi-icon">⏱</div><div class="kpi-val" style="font-size:20px">' + promedioStr + '</div><div class="kpi-label">Tiempo promedio cierre</div></div>' +
-      '</div><div class="dash-grid">';
-
-    // Tareas por estado
-    html += '<div class="dash-card"><h3>📊 Tareas por estado</h3>';
-    ['Abierto','En curso','Cerrada','Resuelta'].forEach(e => {
-      html += '<div class="estado-pill" style="background:' + estadoColors[e] + '15"><div class="estado-dot" style="background:' + estadoColors[e] + '"></div><span class="estado-pill-label">' + e + '</span><span class="estado-pill-val">' + (porEstado[e]||0) + '</span></div>';
-    });
-    html += '</div>';
-
-    // Por concesion
-    html += '<div class="dash-card"><h3>🗺 Por concesión</h3>';
-    if (topConcesion.length) {
-      topConcesion.forEach(([z,n]) => {
-        html += '<div class="bar-row"><span class="bar-label">' + z + '</span><div class="bar-track"><div class="bar-fill" style="width:' + Math.round(n/(topConcesion[0]?.[1]||1)*100) + '%"></div></div><span class="bar-val">' + n + '</span></div>';
-      });
-    } else html += '<div class="sin-datos">Sin datos</div>';
-    html += '</div>';
-
-    // Top personal
-    html += '<div class="dash-card"><h3>👤 Top personal — Novedades</h3>';
-    if (topPersonal.length) {
-      topPersonal.forEach(([nombre,cant]) => {
-        html += '<div class="bar-row"><span class="bar-label">' + nombre + '</span><div class="bar-track"><div class="bar-fill" style="width:' + Math.round(cant/maxTop*100) + '%;background:#dc2626"></div></div><span class="bar-val">' + cant + '</span></div>';
-      });
-    } else html += '<div class="sin-datos">Sin novedades en el período</div>';
-    html += '</div>';
-
-    // Tipos
-    html += '<div class="dash-card"><h3>📌 Tipos de tarea más frecuentes</h3>';
-    if (topTipos.length) {
-      topTipos.forEach(([tipo,cant]) => {
-        html += '<div class="bar-row"><span class="bar-label">' + tipo + '</span><div class="bar-track"><div class="bar-fill" style="width:' + Math.round(cant/maxTipo*100) + '%;background:#0f766e"></div></div><span class="bar-val">' + cant + '</span></div>';
-      });
-    } else html += '<div class="sin-datos">Sin datos</div>';
-    html += '</div>';
-
-    // Mapa full width
-    tiposFiltroActivos = new Set(); // reset al generar nuevo dashboard
-    html += '<div class="dash-card dash-card-full">' +
-      '<h3>📍 Mapa de novedades <span style="font-weight:400;color:#94a3b8">(' + novedadesConGPS + ' con ubicación GPS)</span></h3>' +
-      '<div style="display:flex;gap:12px">' +
-        '<div id="mapaNovedades" style="flex:1;min-width:0"></div>' +
-        '<div id="mapaLeyenda" style="width:160px;flex-shrink:0;overflow-y:auto;max-height:380px;padding-right:2px"></div>' +
-      '</div>' +
       '</div>';
 
+    tiposFiltroActivos = new Set();
+
+    // Layout: lateral izq | mapa | lateral der
+    html += '<div class="dash-layout-mapa">';
+
+    // Columna izquierda: estado + concesión
+    html += '<div class="dash-col-lateral">';
+    html += '<div class="dash-card-lateral"><h3>📊 Por estado</h3>';
+    ['Abierto','En curso','Cerrada','Resuelta'].forEach(e => {
+      html += '<div class="estado-pill" style="background:' + estadoColors[e] + '15;margin-bottom:5px">' +
+        '<div class="estado-dot" style="background:' + estadoColors[e] + '"></div>' +
+        '<span class="estado-pill-label" style="font-size:12px">' + e + '</span>' +
+        '<span class="estado-pill-val">' + (porEstado[e]||0) + '</span></div>';
+    });
     html += '</div>';
+    html += '<div class="dash-card-lateral"><h3>🗺 Por concesión</h3>';
+    if (topConcesion.length) {
+      topConcesion.forEach(([z,n]) => {
+        html += '<div class="bar-row"><span class="bar-label" style="width:80px">' + z + '</span><div class="bar-track"><div class="bar-fill" style="width:' + Math.round(n/(topConcesion[0]?.[1]||1)*100) + '%"></div></div><span class="bar-val">' + n + '</span></div>';
+      });
+    } else html += '<div class="sin-datos">Sin datos</div>';
+    html += '</div>';
+    html += '</div>'; // fin col izq
+
+    // Columna central: mapa + leyenda debajo
+    html += '<div class="dash-card-mapa">' +
+      '<h3>📍 Novedades <span style="font-weight:400;color:#94a3b8;font-size:11px">(' + novedadesConGPS + ' con GPS)</span></h3>' +
+      '<div id="mapaNovedades"></div>' +
+      '<div id="mapaLeyenda" style="margin-top:10px;display:flex;flex-wrap:wrap;gap:6px"></div>' +
+      '</div>';
+
+    // Columna derecha: personal + tipos de tarea
+    html += '<div class="dash-col-lateral">';
+    html += '<div class="dash-card-lateral"><h3>👤 Personal — Novedades</h3>';
+    if (topPersonal.length) {
+      topPersonal.forEach(([nombre,cant]) => {
+        html += '<div class="bar-row"><span class="bar-label" style="width:90px">' + nombre + '</span><div class="bar-track"><div class="bar-fill" style="width:' + Math.round(cant/maxTop*100) + '%;background:#dc2626"></div></div><span class="bar-val">' + cant + '</span></div>';
+      });
+    } else html += '<div class="sin-datos">Sin novedades</div>';
+    html += '</div>';
+    html += '<div class="dash-card-lateral"><h3>📌 Tipos de tarea</h3>';
+    if (topTipos.length) {
+      topTipos.forEach(([tipo,cant]) => {
+        html += '<div class="bar-row"><span class="bar-label" style="width:90px">' + tipo + '</span><div class="bar-track"><div class="bar-fill" style="width:' + Math.round(cant/maxTipo*100) + '%;background:#0f766e"></div></div><span class="bar-val">' + cant + '</span></div>';
+      });
+    } else html += '<div class="sin-datos">Sin datos</div>';
+    html += '</div>';
+    html += '</div>'; // fin col der
+
+    html += '</div>'; // fin dash-layout-mapa
     cont.innerHTML = html;
 
     setTimeout(() => {
